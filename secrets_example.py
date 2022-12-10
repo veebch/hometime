@@ -1,0 +1,2 @@
+SSID = "wifissid"
+PASSWORD = "trustnoone"
