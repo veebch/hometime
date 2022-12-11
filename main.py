@@ -24,7 +24,7 @@ def demo(np):
         elif i < math.floor(n*clockout/24) and weekend == False:
             np[i] = (0, 0, 1)
         elif i < math.floor(n*bedtime/24):
-            np[i] = (0, 1, 0)
+            np[i] = (0, 0, 0)
         else:
             np[i] = (1,1,0)
         utime.sleep_ms(20)
@@ -42,6 +42,15 @@ def init(np, upto):
             np[i]= (255, 50 ,25)
             utime.sleep_ms(20)
             np.write()
+
+def addmeet(np,response):
+    n = np.n
+    for x in response:
+        index=int(math.floor((float (x) /24)*n))
+        print(index)
+        np[index] = (0,0,255)
+    np.write()
+
             
 def off(np):
     n=np.n
@@ -58,6 +67,9 @@ while wlan.isconnected()!= True:
 n = 144
 p = 15
 np = neopixel.NeoPixel(machine.Pin(p), n)
+pingzapierurl="http://throb.local/array.json"
+response=urequests.get(pingzapierurl).json()
+print(response)
 try:
     rtc = machine.RTC() 
     upto=int(math.floor(n*(float(rtc.datetime()[4])+float(rtc.datetime()[4])/60)/24))
@@ -66,10 +78,9 @@ try:
 
     while True:
         bar(np, upto)
+        addmeet(np,response)
         utime.sleep(100)
-except:
+except Exception as e:
+    print(e)
     off(np)
-    
-    
-
     
