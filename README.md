@@ -39,7 +39,7 @@ Clone this repository to your computer using the commands (from a terminal):
 
 ```
 cd ~
-git clone https://github.com/veebch/progress-bar.git
+git clone https://github.com/veebch/hometime.git
 cd progress-bar
 ```
 
