@@ -116,7 +116,6 @@ todayseventsurl=secrets.LANURL
 response=urequests.get(todayseventsurl).json()
 dayofweek = set_time()
 count = 1
-donerainbow = False
 firstrun = True   			# When you plug in, update rather than wait until the stroke of the next minute
 while True:
     try:
@@ -136,12 +135,10 @@ while True:
             else:
                 np[hourtoindex(hoursin)]=tuple(z*count for z in barcolor) 		# Just the tip of the bar
             np.write()
-        else:
-            if donerainbow == False:
-                rainbow_cycle(np)
-                off(np)
-                np.write()
-                donerainbow = True
+        if hoursin == clockout:
+            rainbow_cycle(np)
+            off(np)
+            time.sleep(600)							# Sleep for 10 min
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
             machine.reset()							# Reset at 4:44 because Jay Z
         time.sleep(1)
