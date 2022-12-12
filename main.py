@@ -20,6 +20,8 @@ n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
 clockin = 8				# The time work starts (hours into day)
 clockout = 17.5			# The time work ends (hours into day)
+barcolor = (255, 50 ,25)# RGB for bar color
+eventcolor = (0,0,255)	# RGB for event color
 
 def set_time():
     NTP_QUERY = bytearray(48)
@@ -35,56 +37,66 @@ def set_time():
     val = struct.unpack("!I", msg[40:44])[0]
     t = val - NTP_DELTA  + GMT_OFFSET  
     tm = time.gmtime(t)
-    print("time:",tm)
-    machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 'Europe/Zurich'  ))
-    print("systime:",time.localtime())
-        
+    clock = machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 'Europe/Zurich'  ))
+
 def bar(np, upto):
-    for i in range(upto):
-        if i<=upto:
-            np[i]= (255, 50 ,25)
-    np.write()
-    
+    for i in range(hourtoindex(upto)):
+        np[i]= barcolor
+  
 def addmeet(np,response):
     n = np.n
     for x in response:
-        index=int(math.floor(((float (x) - clockin)/(clockout-clockin))*n))
-        print(index)
-        np[index] = (0,0,255)
-    np.write()
-
-            
+        np[hourtoindex(x)] = eventcolor
+                
 def off(np):
     n=np.n
     for i in range(n):
         np[i]= (0, 0 , 0)
-        np.write()          
+        np.write()
+        
+def hourtoindex(hoursin):
+    index=int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
+    return index
 
+def eventnow(hoursin):
+    meetingnow = False
+    for x in response:
+        if hourtoindex(x) == hourtoindex(hoursin):
+            meetingnow = True
+    return meetingnow
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(secrets.SSID, secrets.PASSWORD)
 while wlan.isconnected()!= True:
     time.sleep(1)
-set_time()
+
 np = neopixel.NeoPixel(machine.Pin(p), n)
-pingzapierurl="http://throb.local/array.json"
-response=urequests.get(pingzapierurl).json()
-print(response)
+todayseventsurl="http://throb.local/array.json"
+response=urequests.get(todayseventsurl).json()
+now = set_time()
+count = 1
+firstrun = True   			# When you plug in, update rather than wait until the stroke of the next minute
 try:
-    rtc = machine.RTC()
     while True:
-        hoursin = float(rtc.datetime()[4])+float(rtc.datetime()[4])/60	# hours into day
-        upto=int(math.floor(n*(hoursin-clockin)/(clockout-clockin))) 	# number of the LEDs into working day
-        if upto >=1 and upto <= n:
-            bar(np, upto)
-            addmeet(np,response)
+        if time.gmtime()[5] == 0 or firstrun:
+            hoursin = float(time.gmtime()[3])+float(time.gmtime()[4])/60	# hours into day
+            if hoursin >= clockin and hoursin <= clockout:
+                bar(np, hoursin)
+                addmeet(np,response)
+            else:
+                off(np)
+        if firstrun:		# If this was the initial update, mark it as complete
+            firstrun = False
+        count = (count + 1) % 2
+        if eventnow(hoursin):
+            np[hourtoindex(hoursin)]=tuple(z*count for z in eventcolor)
         else:
-            off(np)
-        time.sleep(60)
+            np[hourtoindex(hoursin)]=tuple(z*count for z in barcolor)
+        np.write()
+        time.sleep(1)
 except Exception as e:
     print(e)
     off(np)
 except KeyboardInterrupt:
     off(np)
-    
