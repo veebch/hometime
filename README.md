@@ -31,7 +31,7 @@ Attach the Light Strip to the Pico as described below
 |   GND      | GND  |
 |   15      | DATA  |
 
-## Software
+## Installing
 
 Download a `uf2` image and install it on the Pico according to the [instructions](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html#drag-and-drop-micropython).
 
