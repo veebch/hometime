@@ -43,7 +43,7 @@ git clone https://github.com/veebch/hometime.git
 cd hometime
 mv secrets_example.py secrets.py
 ```
-Edit secrets.py to gcontain your wifi credentials and (optionally) the url of your Google Calendar schedule. The schedule is created by running serverscript.py on a machine with gcalcli on, and a web server (**systemd** will do it). 
+Edit secrets.py to gcontain your wifi credentials and (optionally) the url of your Google Calendar schedule. The schedule is created by running serverscript.py on a machine with gcalcli on, and a web server (**systemd** will automate the running nicely). 
 
 Check the port of the pico with the port listing command:
 ```
