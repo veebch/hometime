@@ -10,6 +10,5 @@ There's also an optional and slightly elaborate link between Google Calendar and
 
 If it is the weekend, of outside work hours, no lights show.
 
-# To Do
-
-the RTC automatically sets when connected to thonny, but not otherwise it seems....investigate
+# License 
+GPL 3
