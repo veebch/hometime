@@ -16,7 +16,12 @@ There's also an optional and slightly elaborate link between Google Calendar and
 
 If it is the weekend, of outside work hours, no lights show.
 
-# Assembly
+## Hardware
+
+- Raspberry Pi Pico W
+- 1 m, 144 LED, 5V Addressable LED strip
+
+## Assembly
 
 ### Light Sensor
 
