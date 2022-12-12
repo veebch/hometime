@@ -5,7 +5,7 @@
 
 # Hoooometime? A work-day progress bar
 
-A physical LED progress bar for the working day that contains information from Google calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W.
+A physical LED progress bar for the working day that includes information from Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W.
 
 ## How it works
 
