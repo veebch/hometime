@@ -26,3 +26,28 @@ If it is the weekend, of outside work hours, no lights show.
 |   GND      | GND  |
 |   15      | DATA  |
 
+## Software
+
+Download a `uf2` image and install it on the Pico according to the [instructions](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html#drag-and-drop-micropython).
+
+Clone this repository to your computer using the commands (from a terminal):
+
+```
+cd ~
+git clone https://github.com/veebch/progress-bar.git
+cd progress-bar
+```
+
+Check the port of the pico with the port listing command:
+```
+python -m serial.tools.list_ports
+```
+Now, using the port path (in our case `/dev/ttyACM0`) copy the contents to the repository by installing [ampy](https://pypi.org/project/adafruit-ampy/) and using  and the commands:
+
+```
+ampy -p /dev/ttyACM0 put main.py
+ampy -p /dev/ttyACM0 put secrets.py
+```
+(*nb. make sure you are using the right port name, as shown in the port listing command above*)
+
+Done! All the required files should now be on the Pico. When you disconnect from USB and power on using the button on the power shim the script will autorun.
