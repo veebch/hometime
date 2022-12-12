@@ -31,9 +31,9 @@ Attach the Light Strip to the Pico as described below
 |   GND      | GND  |
 |   15      | DATA  |
 
-## Software
+## Installing
 
-Download a `uf2` image and install it on the Pico according to the [instructions](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html#drag-and-drop-micropython).
+Download a `uf2` image and install it on the Pico W according to the [instructions](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html#drag-and-drop-micropython) on the Raspberry Pi website.
 
 Clone this repository to your computer using the commands (from a terminal):
 
@@ -41,7 +41,9 @@ Clone this repository to your computer using the commands (from a terminal):
 cd ~
 git clone https://github.com/veebch/hometime.git
 cd hometime
+mv secrets_example.py secrets.py
 ```
+Edit secrets.py to gcontain your wifi credentials and (optionally) the url of your Google Calendar schedule, created by running serverscript.py on a machine with gcalcli on, and a web server. 
 
 Check the port of the pico with the port listing command:
 ```
