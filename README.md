@@ -3,7 +3,7 @@
 [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/v_e_e_b/)
 
 
-# Hpmetime? The work-day Progress Bar
+# Hoooometime? The work-day Progress Bar
 
 A physical progress bar for the working day, that uses a Raspberry Pi Pico W and an addressable led strip.
 
