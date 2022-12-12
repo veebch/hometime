@@ -41,7 +41,9 @@ Clone this repository to your computer using the commands (from a terminal):
 cd ~
 git clone https://github.com/veebch/hometime.git
 cd hometime
+mv secrets_example.py secrets.py
 ```
+Edit secrets.py to give it your wifi credentials and optionally the url of your Google Calendar schedule, created by running serverscript.py on a machine with gcalcli on, and a web server. 
 
 Check the port of the pico with the port listing command:
 ```
