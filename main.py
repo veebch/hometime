@@ -20,7 +20,7 @@ n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
 clockin = 8				# The time work starts (hours into day)
 clockout = 17.5			# The time work ends (hours into day)
-barcolor = (255, 50 ,25)# RGB for bar color
+barcolor = (5, 50 ,0)	# RGB for bar color
 eventcolor = (0,0,255)	# RGB for event color
 
 def set_time():
@@ -37,7 +37,8 @@ def set_time():
     val = struct.unpack("!I", msg[40:44])[0]
     t = val - NTP_DELTA  + GMT_OFFSET  
     tm = time.gmtime(t)
-    clock = machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 'Europe/Zurich'  ))
+    clock = machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0  ))
+    return tm[6]+1
 
 def bar(np, upto):
     for i in range(hourtoindex(upto)):
@@ -47,6 +48,8 @@ def addmeet(np,response):
     n = np.n
     for x in response:
         np[hourtoindex(x)] = eventcolor
+        if hourtoindex(x)+1 < n:
+            np[hourtoindex(x)+1] = eventcolor
                 
 def off(np):
     n=np.n
@@ -59,11 +62,11 @@ def hourtoindex(hoursin):
     return index
 
 def eventnow(hoursin):
-    meetingnow = False
+    event = False
     for x in response:
         if hourtoindex(x) == hourtoindex(hoursin):
-            meetingnow = True
-    return meetingnow
+            event = True
+    return event
 
 def wheel(pos):
     # Input a value 0 to 255 to get a color value.
@@ -87,50 +90,64 @@ def wheel(pos):
     return (r, g, b) 
 
 
-def rainbow_cycle(wait):
+def rainbow_cycle(np):
     for j in range(255):
         for i in range(n):
             pixel_index = (i * 256 // n) + j
             np[i] = wheel(pixel_index & 255)
         np.write()
-        time.sleep(wait)
-
+        
+def atwork(dow,time):
+    work = False
+    if dow > 5:
+        pass
+    else:
+        if time >= clockin and time <= clockout:
+            work = True
+    return work
+        
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(secrets.SSID, secrets.PASSWORD)
 while wlan.isconnected()!= True:
     time.sleep(1)
-
 np = neopixel.NeoPixel(machine.Pin(p), n)
 todayseventsurl=secrets.LANURL
 response=urequests.get(todayseventsurl).json()
-now = set_time()
+dayofweek = set_time()
 count = 1
-rainbow_cycle(0.001)  # rainbow cycle with 1ms delay per step
-off(np)
+donerainbow = False
 firstrun = True   			# When you plug in, update rather than wait until the stroke of the next minute
-try:
-    while True:
-        if time.gmtime()[5] == 0 or firstrun:
-            hoursin = float(time.gmtime()[3])+float(time.gmtime()[4])/60	# hours into day
-            if hoursin >= clockin and hoursin <= clockout:
+while True:
+    try:
+        now = time.gmtime()
+        hoursin = float(now[3])+float(now[4])/60	# hours into the day
+        working = atwork(dayofweek,hoursin)
+        if working:
+            if time.gmtime()[5] == 0 or firstrun: 	# update lights at the stroke of every minute, or on first run
                 bar(np, hoursin)
                 addmeet(np,response)
-            elif hourtoindex(hoursin) == hourtoindex(clockout)+1:
-                rainbow_cycle(0.001)
+                if firstrun:						# If this was the initial update, mark it as complete
+                    firstrun = False
+            count = (count + 1) % 2					# The value used to toggle lights
+            if eventnow(hoursin):  					# If an event is starting, flash all LEDS otherwise just the end of the bar
+                for i in range(n):
+                    np[i]=tuple(z*count for z in eventcolor) 					# All lights
             else:
-                off(np)
-        if firstrun:		# If this was the initial update, mark it as complete
-            firstrun = False
-        count = (count + 1) % 2
-        if eventnow(hoursin):
-            np[hourtoindex(hoursin)]=tuple(z*count for z in eventcolor)
+                np[hourtoindex(hoursin)]=tuple(z*count for z in barcolor) 		# Just the tip of the bar
+            np.write()
         else:
-            np[hourtoindex(hoursin)]=tuple(z*count for z in barcolor)
-        np.write()
+            if donerainbow == False:
+                rainbow_cycle(np)
+                off(np)
+                np.write()
+                donerainbow = True
+        if now[5] == 0 and now[4] == 44 and now[3] == 4:
+            machine.reset()							# Reset at 4:44 because Jay Z
         time.sleep(1)
-except Exception as e:
-    print(e)
-    off(np)
-except KeyboardInterrupt:
-    off(np)
+    except Exception as e:
+        print(e)
+        off(np)
+    except KeyboardInterrupt:
+        off(np)
+
