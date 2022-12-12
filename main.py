@@ -116,31 +116,31 @@ todayseventsurl=secrets.LANURL
 response=urequests.get(todayseventsurl).json()
 dayofweek = set_time()
 count = 1
-firstrun = True   			# When you plug in, update rather than wait until the stroke of the next minute
+firstrun = True   																# When you plug in, update rather than wait until the stroke of the next minute
 while True:
     try:
         now = time.gmtime()
-        hoursin = float(now[3])+float(now[4])/60	# hours into the day
+        hoursin = float(now[3])+float(now[4])/60								# hours into the day
         working = atwork(dayofweek,hoursin)
         if working:
-            if time.gmtime()[5] == 0 or firstrun: 	# update lights at the stroke of every minute, or on first run
+            if time.gmtime()[5] == 0 or firstrun: 								# update lights at the stroke of every minute, or on first run
                 bar(np, hoursin)
                 addmeet(np,response)
-                if firstrun:						# If this was the initial update, mark it as complete
+                if firstrun:													# If this was the initial update, mark it as complete
                     firstrun = False
-            count = (count + 1) % 2					# The value used to toggle lights
-            if eventnow(hoursin):  					# If an event is starting, flash all LEDS otherwise just the end of the bar
+            count = (count + 1) % 2												# The value used to toggle lights
+            if eventnow(hoursin):  												# If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
                     np[i]=tuple(z*count for z in eventcolor) 					# All lights
             else:
                 np[hourtoindex(hoursin)]=tuple(z*count for z in barcolor) 		# Just the tip of the bar
             np.write()
-        if hoursin == clockout:
+        if hoursin - clockout > 0 and hoursin - clockout < (1/60):
             rainbow_cycle(np)
             off(np)
-            time.sleep(600)							# Sleep for 10 min
+            time.sleep(600)														# Sleep for 10 min
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
-            machine.reset()							# Reset at 4:44 because Jay Z
+            machine.reset()														# Reset at 4:44 because Jay Z
         time.sleep(1)
     except Exception as e:
         print(e)
