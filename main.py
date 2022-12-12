@@ -13,7 +13,7 @@ import re, math
 import socket
 import struct
 
-NTP_DELTA = 2208988800 	# NTP is  1 Jan 1970
+NTP_DELTA = 2208988800 	# NTP delta is 1 Jan 1970 for host
 GMT_OFFSET = 3600      	# hack because timezone support seems to be lacking, seconds relative to GMT
 host = "pool.ntp.org"	# The ntp server used for grabbing time
 n = 144   				# Number of pixels on strip
@@ -72,7 +72,7 @@ while wlan.isconnected()!= True:
     time.sleep(1)
 
 np = neopixel.NeoPixel(machine.Pin(p), n)
-todayseventsurl="http://throb.local/array.json"
+todayseventsurl=secrets.LANURL
 response=urequests.get(todayseventsurl).json()
 now = set_time()
 count = 1
