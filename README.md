@@ -40,7 +40,7 @@ Clone this repository to your computer using the commands (from a terminal):
 ```
 cd ~
 git clone https://github.com/veebch/hometime.git
-cd progress-bar
+cd hometime
 ```
 
 Check the port of the pico with the port listing command:
