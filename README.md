@@ -1,6 +1,8 @@
 # Progress Bar
 
-A physical progress bar for the working day, that uses a Raspberry Pi Pico W and an addressable led strip. 
+A physical progress bar for the working day, that uses a Raspberry Pi Pico W and an addressable led strip.
+
+## How it works
 
 The progress bar measures the working day. It connects to wifi, grabs the time from an ntp server, then shows you how far through the day you are. It runs from your defined start time to hometime. 
 
