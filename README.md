@@ -27,7 +27,7 @@ If it is the weekend, of outside work hours, no lights show.
 
 ## Assembly
 
-Attach the Light Strip to the Pico as described below
+Attach the Light Strip to the Pico as described below:
 
 | [Pico GPIO](https://www.elektronik-kompendium.de/sites/raspberry-pi/bilder/raspberry-pi-pico-gpio.png) | Light Strip|
 |-----------|------|
