@@ -22,7 +22,7 @@ If it is the weekend, of outside work hours, no lights show.
 
 | [Pico GPIO](https://www.elektronik-kompendium.de/sites/raspberry-pi/bilder/raspberry-pi-pico-gpio.png) | BH1745 |
 |-----------|------|
-|   VBUS     VCC  |
+|   VBUS     | VCC  |
 |   GND      | GND  |
 |   15      | DATA  |
 
