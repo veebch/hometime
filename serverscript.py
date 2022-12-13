@@ -5,7 +5,7 @@ import re
 # Run the `gcalcli` command to get your agenda
 agenda = subprocess.run(["gcalcli", "--nocolor", "--nocache", "agenda"], capture_output=True)
 string = agenda.stdout.decode("utf-8")
-regex = r".*(\d\d):(\d\d)"
+regex = r"\D*(\d?\d):(\d\d)"
 stopatbreak = 2
 breaksseen = 0
 pattern = re.compile(regex)
