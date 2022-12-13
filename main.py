@@ -41,15 +41,26 @@ def set_time():
     return tm[6]+1
 
 def bar(np, upto):
-    for i in range(hourtoindex(upto)):
-        np[i]= barcolor
+    n =np.n
+    barupto = hourtoindex(upto)
+    for i in range(n):
+        if i<=barupto:
+            np[i] = barcolor
+        else:
+            np[i] = (0,0,0)
   
-def addmeet(np,response):
+def addevents(np,response):
     n = np.n
     for x in response:
-        np[hourtoindex(x)] = eventcolor
-        if hourtoindex(x)+1 < n:
-            np[hourtoindex(x)+1] = eventcolor
+        index = hourtoindex(x)
+        if valid(index):
+            np[index] = eventcolor
+
+def valid(index):
+    valid=False
+    if index <= n and index > 0:
+        valid = True
+    return valid
                 
 def off(np):
     n=np.n
@@ -61,7 +72,7 @@ def hourtoindex(hoursin):
     index=int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
     return index
 
-def eventnow(hoursin):
+def eventnow(hoursin,response):
     event = False
     for x in response:
         if hourtoindex(x) == hourtoindex(hoursin):
@@ -113,7 +124,6 @@ while wlan.isconnected()!= True:
     time.sleep(1)
 np = neopixel.NeoPixel(machine.Pin(p), n)
 todayseventsurl=secrets.LANURL
-response=urequests.get(todayseventsurl).json()
 dayofweek = set_time()
 count = 1
 firstrun = True   																# When you plug in, update rather than wait until the stroke of the next minute
@@ -124,12 +134,14 @@ while True:
         working = atwork(dayofweek,hoursin)
         if working:
             if time.gmtime()[5] == 0 or firstrun: 								# update lights at the stroke of every minute, or on first run
+                response=urequests.get(todayseventsurl).json()
+                print("Events at:",response)
                 bar(np, hoursin)
-                addmeet(np,response)
+                addevents(np,response)
                 if firstrun:													# If this was the initial update, mark it as complete
                     firstrun = False
             count = (count + 1) % 2												# The value used to toggle lights
-            if eventnow(hoursin):  												# If an event is starting, flash all LEDS otherwise just the end of the bar
+            if eventnow(hoursin,response):  												# If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
                     np[i]=tuple(z*count for z in eventcolor) 					# All lights
             else:
