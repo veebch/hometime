@@ -5,7 +5,11 @@
 
 # Hoooometime? A work-day progress bar
 
-A physical LED progress bar for the working day that includes information from Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W.
+A physical LED progress bar for the working day that includes information from Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It currently:
+
+- keeps you posted on how much of the workday has already passed, 
+- flashes when it's time for an event, 
+- rewards you with a pretty rainbow at hometime.
 
 ## How it works
 
@@ -23,7 +27,7 @@ If it is the weekend, of outside work hours, no lights show.
 
 ## Assembly
 
-Attach the Light Strip to the Pico as described below
+Attach the Light Strip to the Pico as described below:
 
 | [Pico GPIO](https://www.elektronik-kompendium.de/sites/raspberry-pi/bilder/raspberry-pi-pico-gpio.png) | Light Strip|
 |-----------|------|
@@ -43,7 +47,7 @@ git clone https://github.com/veebch/hometime.git
 cd hometime
 mv secrets_example.py secrets.py
 ```
-Edit secrets.py to gcontain your wifi credentials and (optionally) the url of your Google Calendar schedule, created by running serverscript.py on a machine with gcalcli on, and a web server. 
+Edit secrets.py to contain your WiFi credentials and (optionally) the url of your Google Calendar schedule. The schedule is created by running serverscript.py on a machine with gcalcli on, and a web server. For automation **systemd** or **cron** will automate running `serverscript.py` nicely. 
 
 Check the port of the pico with the port listing command:
 ```
