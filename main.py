@@ -20,7 +20,7 @@ n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
 clockin = 8				# The time work starts (hours into day)
 clockout = 17.5			# The time work ends (hours into day)
-barcolor = (0, 255 ,0)	# RGB for bar color
+barcolor = (0, 25 ,0)	# RGB for bar color
 eventcolor = (0,0,255)	# RGB for event color
 flip=False				# Flip display (set to True if the strip runs from right to left)
 
@@ -128,17 +128,21 @@ wlan.active(True)
 wlan.connect(secrets.SSID, secrets.PASSWORD)
 while wlan.isconnected()!= True:
     time.sleep(1)
+    print("Not connecting to WiFi\nWaiting\n")
 np = neopixel.NeoPixel(machine.Pin(p), n)
 todayseventsurl=secrets.LANURL
 dayofweek = set_time()
 count = 1
 firstrun = True   															# When you plug in, update rather than wait until the stroke of the next minute
+print("connected: Start loop")
+rainbow_cycle(np)
+off(np)
 while True:
     try:
         now = time.gmtime()
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         working = atwork(dayofweek,hoursin)
-        if working:
+        if working:  														# If not working, no lights will show
             if time.gmtime()[5] == 0 or firstrun == True:					# update lights at the stroke of every minute, or on first run
                 response=urequests.get(todayseventsurl).json()
                 print("Events at:",response)
