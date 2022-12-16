@@ -20,6 +20,10 @@ There's also an optional and slightly elaborate link between Google Calendar and
 
 If it is the weekend, of outside work hours, no lights show.
 
+## Video
+
+Here's a video of it working as part of a home made whiteboard.
+
 ## Hardware
 
 - Raspberry Pi Pico W
