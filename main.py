@@ -20,8 +20,9 @@ n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
 clockin = 8				# The time work starts (hours into day)
 clockout = 17.5			# The time work ends (hours into day)
-barcolor = (5, 50 ,0)	# RGB for bar color
+barcolor = (0, 255 ,0)	# RGB for bar color
 eventcolor = (0,0,255)	# RGB for event color
+flip=False				# Flip display (set to True if the strip runs from right to left)
 
 def set_time():
     NTP_QUERY = bytearray(48)
@@ -41,16 +42,20 @@ def set_time():
     return tm[6]+1
 
 def bar(np, upto):
-    n =np.n
     barupto = hourtoindex(upto)
     for i in range(n):
-        if i<=barupto:
-            np[i] = barcolor
+        if flip ==  True:
+            if i>=barupto:
+                np[i] = barcolor
+            else:
+                np[i] = (0,0,0) 
         else:
-            np[i] = (0,0,0)
+            if i<=barupto:
+                np[i] = barcolor
+            else:
+                np[i] = (0,0,0)
   
 def addevents(np,response):
-    n = np.n
     for x in response:
         index = hourtoindex(x)
         if valid(index):
@@ -63,13 +68,14 @@ def valid(index):
     return valid
                 
 def off(np):
-    n=np.n
     for i in range(n):
         np[i]= (0, 0 , 0)
         np.write()
         
 def hourtoindex(hoursin):
     index=int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
+    if flip ==  True:
+        index = n - 1 - index
     return index
 
 def eventnow(hoursin,response):
@@ -133,7 +139,7 @@ while True:
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         working = atwork(dayofweek,hoursin)
         if working:
-            if time.gmtime()[5] == 0 or firstrun: 							# update lights at the stroke of every minute, or on first run
+            if time.gmtime()[5] == 0 or firstrun == True:					# update lights at the stroke of every minute, or on first run
                 response=urequests.get(todayseventsurl).json()
                 print("Events at:",response)
                 bar(np, hoursin)
@@ -141,7 +147,7 @@ while True:
                 if firstrun:												# If this was the initial update, mark it as complete
                     firstrun = False
             count = (count + 1) % 2											# The value used to toggle lights
-            if eventnow(hoursin,response):  								# If an event is starting, flash all LEDS otherwise just the end of the bar
+            if eventnow(hoursin,response) == True:  						# If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
                     np[i]=tuple(z*count for z in eventcolor) 				# All lights
             else:
