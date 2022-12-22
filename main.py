@@ -143,7 +143,7 @@ while True:
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         working = atwork(dayofweek,hoursin)
         if working:  														# If not working, no lights will show
-            if time.gmtime()[5] == 0 or firstrun == True:					# update lights at the stroke of every minute, or on first run
+            if time.gmtime()[5] == 10 or firstrun == True:					# update lights at the stroke of every minute, or on first run
                 response=urequests.get(todayseventsurl).json()
                 print("Events at:",response)
                 bar(np, hoursin)
@@ -157,7 +157,7 @@ while True:
             else:
                 np[hourtoindex(hoursin)]=tuple(z*count for z in barcolor) 	# Just the tip of the bar
             np.write()
-        if hoursin - clockout > 0 and hoursin - clockout < (1/60):
+        if hoursin - clockout >= 0 and hoursin - clockout < (1/60):
             rainbow_cycle(np)
             off(np)
             time.sleep(600)													# Sleep for 10 min
