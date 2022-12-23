@@ -24,7 +24,6 @@ If it is the weekend, of outside work hours, no lights show.
 
 Here's a video of it working as part of a home made whiteboard.
 
-https://youtu.be/
 
 [![Video](https://img.youtube.com/vi/MDij1lKcI70/maxresdefault.jpg)](https://www.youtube.com/watch?v=MDij1lKcI70)
 
