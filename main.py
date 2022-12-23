@@ -9,7 +9,7 @@ import network
 import secrets
 import urequests
 import neopixel
-import re, math
+import re, math    
 import socket
 import struct
 
@@ -18,8 +18,8 @@ GMT_OFFSET = 3600      	# hack because timezone support seems to be lacking, sec
 host = "pool.ntp.org"	# The ntp server used for grabbing time
 n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
-clockin = 8				# The time work starts (hours into day)
-clockout = 17.5			# The time work ends (hours into day)
+clockin = 12			# The time work starts (hours into day)
+clockout = 20			# The time work ends (hours into day)
 barcolor = (0, 25 ,0)	# RGB for bar color
 eventcolor = (0,0,255)	# RGB for event color
 flip=False				# Flip display (set to True if the strip runs from right to left)
@@ -76,6 +76,9 @@ def hourtoindex(hoursin):
     index=int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
     if flip ==  True:
         index = n - 1 - index
+    print(index)
+    if index <= 1 or index >= n:
+        index = -1
     return index
 
 def eventnow(hoursin,response):
@@ -116,10 +119,11 @@ def rainbow_cycle(np):
         
 def atwork(dow,time):
     work = False
+    index=hourtoindex(time)
     if dow > 5:
         pass
     else:
-        if time >= clockin and time <= clockout:
+        if index != -1:
             work = True
     return work
         
@@ -135,27 +139,29 @@ dayofweek = set_time()
 count = 1
 firstrun = True   															# When you plug in, update rather than wait until the stroke of the next minute
 print("connected: Start loop")
-rainbow_cycle(np)
 off(np)
 while True:
     try:
         now = time.gmtime()
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         working = atwork(dayofweek,hoursin)
-        if working:  														# If not working, no lights will show
-            if time.gmtime()[5] == 10 or firstrun == True:					# update lights at the stroke of every minute, or on first run
-                response=urequests.get(todayseventsurl).json()
-                print("Events at:",response)
-                bar(np, hoursin)
-                addevents(np,response)
-                if firstrun:												# If this was the initial update, mark it as complete
-                    firstrun = False
+        if working:
+            response=urequests.get(todayseventsurl).json()
+            eventbool = eventnow(hoursin,response)
+            # If not working, no lights will show
+            					# update lights at the stroke of every minute, or on first run
+            print("Events at:",response)
+            bar(np, hoursin)
+            addevents(np,response)
+            if firstrun:												# If this was the initial update, mark it as complete
+                firstrun = False
             count = (count + 1) % 2											# The value used to toggle lights
-            if eventnow(hoursin,response) == True:  						# If an event is starting, flash all LEDS otherwise just the end of the bar
+            if  eventbool == True:  						# If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
                     np[i]=tuple(z*count for z in eventcolor) 				# All lights
             else:
-                np[hourtoindex(hoursin)]=tuple(z*count for z in barcolor) 	# Just the tip of the bar
+                ledindex = min(hourtoindex(hoursin),n)
+                np[ledindex]=tuple(z*count for z in barcolor) 	# Just the tip of the bar
             np.write()
         if hoursin - clockout >= 0 and hoursin - clockout < (1/60):
             rainbow_cycle(np)
