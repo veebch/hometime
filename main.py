@@ -76,7 +76,6 @@ def hourtoindex(hoursin):
     index=int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
     if flip ==  True:
         index = n - 1 - index
-    print(index)
     if index <= 1 or index >= n:
         index = -1
     return index
@@ -150,15 +149,14 @@ while True:
             eventbool = eventnow(hoursin,response)
             # If not working, no lights will show
             					# update lights at the stroke of every minute, or on first run
-            print("Events at:",response)
             bar(np, hoursin)
             addevents(np,response)
             if firstrun:												# If this was the initial update, mark it as complete
                 firstrun = False
-            count = (count + 1) % 2											# The value used to toggle lights
-            if  eventbool == True:  						# If an event is starting, flash all LEDS otherwise just the end of the bar
+            count = (count + 1) % 2										# The value used to toggle lights
+            if  eventbool == True:  									# If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
-                    np[i]=tuple(z*count for z in eventcolor) 				# All lights
+                    np[i]=tuple(z*count for z in eventcolor) 			# All lights
             else:
                 ledindex = min(hourtoindex(hoursin),n)
                 np[ledindex]=tuple(z*count for z in barcolor) 	# Just the tip of the bar
