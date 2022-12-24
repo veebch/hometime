@@ -30,7 +30,7 @@ Here's a video of it working as part of a home made whiteboard.
 ## Hardware
 
 - Raspberry Pi Pico W
-- 1 m, 144 LED, 5V Addressable LED strip
+- 1 m, 144 LED, 5V Addressable LED strip (we used a WS2812B Eco)
 
 ## Assembly
 
