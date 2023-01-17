@@ -167,8 +167,8 @@ while True:
             if shonetoday is False:
                 rainbow_cycle(np)
                 shonetoday=True
-            off(np)
-            time.sleep(600)													# Sleep for 10 min
+                off(np)
+                time.sleep(600)													# Sleep for 10 min
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
             machine.reset()													# Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
