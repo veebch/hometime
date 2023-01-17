@@ -139,12 +139,14 @@ count = 1
 firstrun = True   															# When you plug in, update rather than wait until the stroke of the next minute
 print("connected: Start loop")
 off(np)
+shonetoday=True
 while True:
     try:
         now = time.gmtime()
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         working = atwork(dayofweek,hoursin)
         if working:
+            shonetoday=False
             response=urequests.get(todayseventsurl).json()
             eventbool = eventnow(hoursin,response)
             # If not working, no lights will show
@@ -161,8 +163,10 @@ while True:
                 ledindex = min(hourtoindex(hoursin),n)
                 np[ledindex]=tuple(z*count for z in barcolor) 	# Just the tip of the bar
             np.write()
-        if hoursin - clockout >= 0 and hoursin - clockout < (1/60):
-            rainbow_cycle(np)
+        else:
+            if shonetoday is False:
+                rainbow_cycle(np)
+                shonetoday=True
             off(np)
             time.sleep(600)													# Sleep for 10 min
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
