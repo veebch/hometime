@@ -18,11 +18,60 @@ GMT_OFFSET = 3600      	# hack because timezone support seems to be lacking, sec
 host = "pool.ntp.org"	# The ntp server used for grabbing time
 n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
-clockin = 8.5			# The time work starts (hours into day)
-clockout = 16.5			# The time work ends (hours into day)
 barcolor = (0, 25 ,0)	# RGB for bar color
 eventcolor = (0,0,255)	# RGB for event color
 flip=False				# Flip display (set to True if the strip runs from right to left)
+googlecalbool=True		# Boolean for whether to check google calendar page
+schedule = {
+    "monday": [
+      {
+        "clockin": "9",
+        "clockout": "17"
+      }
+    ],
+    "tuesday": [
+      {
+        "clockin": "9",
+        "clockout": "17"
+      }
+    ],
+    "wednesday": [
+      {
+        "clockin": "9",
+        "clockout": "17"
+      }
+    ],
+    "thursday": [
+      {
+        "clockin": "9",
+        "clockout": "17"
+      }
+    ],
+    "friday": [
+      {
+        "clockin": "9",
+        "clockout": "17"
+      }
+    ],
+    "saturday": [
+      {
+        "clockin": "13",
+        "clockout": "14"
+      }
+    ],
+    "sunday": [
+      {
+        "clockin": "0",
+        "clockout": "0"
+      }
+    ]
+}
+
+def whatday(weekday):
+    dayindex = int(weekday)
+    nameofday = ['monday', 'tuesday', 'wednesday', 'thursday','friday','saturday','sunday']
+    day = nameofday[dayindex]
+    return day
 
 def set_time():
     NTP_QUERY = bytearray(48)
@@ -116,13 +165,11 @@ def rainbow_cycle(np):
             np[i] = wheel(pixel_index & 255)
         np.write()
         
-def atwork(dow,time):
+def atwork(clockin,clockout,time):
     work = False
-    index=hourtoindex(time)
-    if dow > 5:
-        pass
-    else:
-        if index != -1:
+    if clockout>clockin:
+        index=hourtoindex(time)
+        if time >= clockin and time <= clockout:
             work = True
     return work
         
@@ -134,7 +181,6 @@ while wlan.isconnected()!= True:
     print("Not connecting to WiFi\nWaiting\n")
 np = neopixel.NeoPixel(machine.Pin(p), n)
 todayseventsurl=secrets.LANURL
-dayofweek = set_time()
 count = 1
 firstrun = True   															# When you plug in, update rather than wait until the stroke of the next minute
 print("connected: Start loop")
@@ -143,16 +189,24 @@ shonetoday=True
 while True:
     try:
         now = time.gmtime()
+        dayname = whatday(int(now[6]))
+        clockin = float(schedule[dayname][0]['clockin'])
+        clockout = float(schedule[dayname][0]['clockout'])
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
-        working = atwork(dayofweek,hoursin)
+        print('working?')
+        working = atwork(clockin,clockout,hoursin)
+        print(working)
         if working:
             shonetoday=False
             response=urequests.get(todayseventsurl).json()
-            eventbool = eventnow(hoursin,response)
             # If not working, no lights will show
-            					# update lights at the stroke of every minute, or on first run
+            # update lights at the stroke of every minute, or on first run
             bar(np, hoursin)
-            addevents(np,response)
+            if googlecalbool is True:
+                eventbool = eventnow(hoursin,response)
+            else:
+                eventbool = False
+                addevents(np,response)
             if firstrun:												# If this was the initial update, mark it as complete
                 firstrun = False
             count = (count + 1) % 2										# The value used to toggle lights
