@@ -60,8 +60,8 @@ schedule = {
     ],
     "saturday": [
       {
-        "clockin": "15",
-        "clockout": "16"
+        "clockin": "16",
+        "clockout": "17"
       }
     ],
     "sunday": [
@@ -230,13 +230,13 @@ while True:
                 shonetoday=True
                 off(np)
                 time.sleep(600)
-        if wlan.isconnected()!= True:
-            wlan = network.WLAN(network.STA_IF)
-            wlan.active(True)
-            wlan.connect(secrets.SSID, secrets.PASSWORD)
-            while wlan.isconnected()!= True:
-                time.sleep(1)
-                print("Not connecting to WiFi\nWaiting\n")
+#         if wlan.isconnected()!= True:
+#             wlan = network.WLAN(network.STA_IF)
+#             wlan.active(True)
+#             wlan.connect(secrets.SSID, secrets.PASSWORD)
+#             while wlan.isconnected()!= True:
+#                 time.sleep(1)
+#                 print("Not connecting to WiFi\nWaiting\n")
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
             machine.reset()													# Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
