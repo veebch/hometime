@@ -204,8 +204,6 @@ while True:
             bar(np, hoursin)
             if googlecalbool is True:
                 eventbool = eventnow(hoursin,response)
-            else:
-                eventbool = False
                 addevents(np,response)
             if firstrun:												# If this was the initial update, mark it as complete
                 firstrun = False
