@@ -169,8 +169,10 @@ def rainbow_cycle(np):
             np[i] = wheel(pixel_index & 255)
         np.write()
         
-def atwork(time):
-    index=hourtoindex(time)
+def atwork(clockin,clockout,time):
+    index = -1
+    if clockin != clockout:
+        index=hourtoindex(time)
     work = False
     if index > -1:
         work = True
@@ -199,7 +201,7 @@ while True:
         clockout = float(schedule[dayname][0]['clockout'])
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         print('working?')
-        working = atwork(hoursin)
+        working = atwork(clockin, clockout, hoursin)
         print(working, hoursin)
         if working is True:
             shonetoday=False
