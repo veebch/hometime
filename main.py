@@ -22,6 +22,11 @@ barcolor = (0, 25 ,0)	# RGB for bar color
 eventcolor = (0,0,255)	# RGB for event color
 flip=False				# Flip display (set to True if the strip runs from right to left)
 googlecalbool=True		# Boolean for whether to check google calendar page
+led = machine.Pin("LED", machine.Pin.OUT)
+led.off()
+led.on()
+time.sleep(1)
+led.off()
 schedule = {
     "monday": [
       {
