@@ -18,7 +18,7 @@ The progress bar displays your progress through the working day. It connects to 
 There's also an optional and slightly elaborate link between Google Calendar and the bar. A computer running [gcalcli](https://github.com/insanum/gcalcli) on the LAN checks the agenda every few minutes and then pops the result on a local webserver. The script on the Pico checks that file and adds event start times as coloured dots.
 
 
-If it is the weekend, of outside work hours, no lights show.
+If it is outside work hours, no lights show.
 
 ## Video
 
