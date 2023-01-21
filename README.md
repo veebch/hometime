@@ -22,7 +22,7 @@ If it is outside work hours, no lights show.
 
 ## Video
 
-Here's a video of it being assembled and working as part of a home made whiteboard.
+Click/tap on the picture for a video of it being assembled and working as part of a home made whiteboard.
 
 
 [![Video](https://img.youtube.com/vi/MDij1lKcI70/maxresdefault.jpg)](https://www.youtube.com/watch?v=MDij1lKcI70)
