@@ -9,7 +9,7 @@ import network
 import secrets
 import urequests
 import neopixel
-import re, math    
+import re, math
 import socket
 import struct
 
@@ -26,7 +26,6 @@ led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
 time.sleep(1)
-led.off()
 schedule = {
     "monday": [
       {
@@ -60,8 +59,8 @@ schedule = {
     ],
     "saturday": [
       {
-        "clockin": "16",
-        "clockout": "17"
+        "clockin": "17",
+        "clockout": "17.2"
       }
     ],
     "sunday": [
@@ -101,13 +100,11 @@ def bar(np, upto):
         if flip ==  True:
             if i>=barupto:
                 np[i] = barcolor
-                print(i,'on')
             else:
                 np[i] = (0,0,0) 
         else:
             if i<=barupto:
                 np[i] = barcolor
-                print(i,'on')
             else:
                 np[i] = (0,0,0)
   
@@ -172,12 +169,11 @@ def rainbow_cycle(np):
             np[i] = wheel(pixel_index & 255)
         np.write()
         
-def atwork(clockin,clockout,time):
+def atwork(time):
+    index=hourtoindex(time)
     work = False
-    if clockout>clockin:
-        index=hourtoindex(time)
-        if time >= clockin and time <= clockout:
-            work = True
+    if index > -1:
+        work = True
     return work
         
 wlan = network.WLAN(network.STA_IF)
@@ -190,9 +186,11 @@ np = neopixel.NeoPixel(machine.Pin(p), n)
 todayseventsurl=secrets.LANURL
 count = 1
 firstrun = True   															# When you plug in, update rather than wait until the stroke of the next minute
-print("connected: Start loop")
+print("connected to WiFi: Start loop")
 off(np)
 shonetoday=True
+led.off()
+set_time()
 while True:
     try:
         now = time.gmtime()
@@ -201,9 +199,9 @@ while True:
         clockout = float(schedule[dayname][0]['clockout'])
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         print('working?')
-        working = atwork(clockin,clockout,hoursin)
+        working = atwork(hoursin)
         print(working, hoursin)
-        if working:
+        if working is True:
             shonetoday=False
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
@@ -224,22 +222,25 @@ while True:
                 ledindex = min(hourtoindex(hoursin),n)
                 np[ledindex]=tuple(z*count for z in barcolor) 			# Just the tip of the bar
             np.write()
+            led.toggle()
         else:
             if shonetoday is False:
+                led.on()
                 rainbow_cycle(np)
                 shonetoday=True
                 off(np)
                 time.sleep(600)
-#         if wlan.isconnected()!= True:
-#             wlan = network.WLAN(network.STA_IF)
-#             wlan.active(True)
-#             wlan.connect(secrets.SSID, secrets.PASSWORD)
-#             while wlan.isconnected()!= True:
-#                 time.sleep(1)
-#                 print("Not connecting to WiFi\nWaiting\n")
+        if wlan.isconnected()!= True:
+            wlan = network.WLAN(network.STA_IF)
+            wlan.active(True)
+            wlan.connect(secrets.SSID, secrets.PASSWORD)
+            while wlan.isconnected()!= True:
+                time.sleep(1)
+                print("Not connecting to WiFi\nWaiting\n")
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
             machine.reset()													# Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
+        #led.toggle()														# LED HEARTBEAT	
     except Exception as e:
         print(e)
         off(np)
