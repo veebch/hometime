@@ -59,8 +59,8 @@ schedule = {
     ],
     "saturday": [
       {
-        "clockin": "17",
-        "clockout": "17.2"
+        "clockin": "0",
+        "clockout": "0"
       }
     ],
     "sunday": [
@@ -222,7 +222,6 @@ while True:
                 ledindex = min(hourtoindex(hoursin),n)
                 np[ledindex]=tuple(z*count for z in barcolor) 			# Just the tip of the bar
             np.write()
-            led.toggle()
         else:
             if shonetoday is False:
                 led.on()
