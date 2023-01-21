@@ -13,7 +13,7 @@ A physical LED progress bar for the working day that includes information from G
 
 ## How it works
 
-The progress bar displays your progress through the working day. It connects to wifi, grabs the time from an ntp server, then shows you how far through the day you are. It runs from your defined start time to hometime. 
+The progress bar displays your progress through the working day. It connects to wifi, grabs the time from an ntp server, then shows you how far through the day you are.
 
 There's also an optional and slightly elaborate link between Google Calendar and the bar. A computer running [gcalcli](https://github.com/insanum/gcalcli) on the LAN checks the agenda every few minutes and then pops the result on a local webserver. The script on the Pico checks that file and adds event start times as coloured dots.
 
