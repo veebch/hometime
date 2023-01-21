@@ -55,8 +55,8 @@ schedule = {
     ],
     "saturday": [
       {
-        "clockin": "14",
-        "clockout": "15"
+        "clockin": "15",
+        "clockout": "16"
       }
     ],
     "sunday": [
@@ -96,11 +96,13 @@ def bar(np, upto):
         if flip ==  True:
             if i>=barupto:
                 np[i] = barcolor
+                print(i,'on')
             else:
                 np[i] = (0,0,0) 
         else:
             if i<=barupto:
                 np[i] = barcolor
+                print(i,'on')
             else:
                 np[i] = (0,0,0)
   
@@ -195,16 +197,18 @@ while True:
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
         print('working?')
         working = atwork(clockin,clockout,hoursin)
-        print(working)
+        print(working, hoursin)
         if working:
             shonetoday=False
-            response=urequests.get(todayseventsurl).json()
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
             bar(np, hoursin)
             if googlecalbool is True:
+                response=urequests.get(todayseventsurl).json()
                 eventbool = eventnow(hoursin,response)
                 addevents(np,response)
+            else:
+                eventbool =  False
             if firstrun:												# If this was the initial update, mark it as complete
                 firstrun = False
             count = (count + 1) % 2										# The value used to toggle lights
@@ -213,8 +217,7 @@ while True:
                     np[i]=tuple(z*count for z in eventcolor) 			# All lights
             else:
                 ledindex = min(hourtoindex(hoursin),n)
-                np[ledindex]=tuple(z*count for z in barcolor) 	# Just the tip of the bar
-            print(np.buf)
+                np[ledindex]=tuple(z*count for z in barcolor) 			# Just the tip of the bar
             np.write()
         else:
             if shonetoday is False:
@@ -229,7 +232,6 @@ while True:
             while wlan.isconnected()!= True:
                 time.sleep(1)
                 print("Not connecting to WiFi\nWaiting\n")
-
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
             machine.reset()													# Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
@@ -238,5 +240,6 @@ while True:
         off(np)
     except KeyboardInterrupt:
         off(np)
+
 
 
