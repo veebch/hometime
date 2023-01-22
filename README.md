@@ -11,6 +11,11 @@ A physical LED progress bar for the working day that includes information from G
 - flashes when it's time for an event, 
 - rewards you with a pretty rainbow at hometime.
 
+## Video
+
+Tap on the picture for a video of it being assembled and working as part of a home made whiteboard.
+
+
 ## How it works
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from an ntp server, then shows you how far through the day you are.
@@ -20,9 +25,6 @@ There's also an optional and slightly elaborate link between Google Calendar and
 
 If it is outside work hours, no lights show.
 
-## Video
-
-Click/tap on the picture for a video of it being assembled and working as part of a home made whiteboard.
 
 
 [![Video](https://img.youtube.com/vi/MDij1lKcI70/maxresdefault.jpg)](https://www.youtube.com/watch?v=MDij1lKcI70)
