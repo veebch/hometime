@@ -15,7 +15,6 @@ A physical LED progress bar for the working day that includes information from G
 
 Tap on the picture for a video of it being assembled and working as part of a home made whiteboard.
 
-
 [![Video](https://img.youtube.com/vi/MDij1lKcI70/maxresdefault.jpg)](https://www.youtube.com/watch?v=MDij1lKcI70)
 
 ## How it works
@@ -69,3 +68,7 @@ ampy -p /dev/ttyACM0 put secrets.py
 (*nb. make sure you are using the right port name, as shown in the port listing command above*)
 
 Done! All the required files should now be on the Pico. Whenever you sconnect to USB power the script will autorun.
+
+## Configuration
+
+You can edit the code to give your start/end time for each day. That and a number of other parameters are in `main.py`
