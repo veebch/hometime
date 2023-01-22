@@ -71,4 +71,4 @@ Done! All the required files should now be on the Pico. Whenever you sconnect to
 
 ## Configuration
 
-You can edit the code to give your start/end time for each day. That and a number of other parameters are in `main.py`
+You can edit the code to give your start/end time for each day. That, and a number of other parameters are in `main.py`
