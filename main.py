@@ -213,7 +213,7 @@ while True:
         dayname = whatday(int(now[6]))
         clockin = float(schedule[dayname][0]['clockin'])
         clockout = float(schedule[dayname][0]['clockout'])
-        hoursin = float(now[3])+float(now[4])/60							# hours into the day
+        hoursin = float(now[3])+float(now[4])/60  # hours into the day
         print('working?')
         working = atwork(clockin, clockout, hoursin)
         print(working, hoursin)
@@ -234,12 +234,15 @@ while True:
                 firstrun = False
             count = (count + 1) % 2	
             # The value used to toggle lights
-            if  eventbool == True:  									# If an event is starting, flash all LEDS otherwise just the end of the bar
+            if  eventbool == True:
+                # If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
-                    np[i]=tuple(z*count for z in eventcolor) 			# All lights
+                    np[i]=tuple(z*count for z in eventcolor)
+                    #All lights
             else:
                 ledindex = min(hourtoindex(hoursin), n)
-                np[ledindex] = tuple(z*count for z in barcolor) 			# Just the tip of the bar
+                np[ledindex] = tuple(z*count for z in barcolor)
+                # Just the tip of the bar
             np.write()
         else:
             if shonetoday is False:
