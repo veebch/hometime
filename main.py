@@ -1,5 +1,6 @@
 #
-#  Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
+#  Progress Bar. Takes a pico W and a light strip to
+#  make a physical progress bar.
 #  PoC, make it better and fork
 #  GPL 3
 #
