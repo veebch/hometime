@@ -15,13 +15,13 @@ import struct
 
 NTP_DELTA = 2208988800 	# NTP delta is 1 Jan 1970 for host
 GMT_OFFSET = 3600      	# hack, seconds relative to GMT
-host = "pool.ntp.org"	# The ntp server used for grabbing time
+host = "pool.ntp.org"   # The ntp server used for grabbing time
 n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
-barcolor = (0, 25, 0)	# RGB for bar color
-eventcolor = (0, 0, 255)	# RGB for event color
-flip = False				# Flip display (set to True if the strip runs from right to left)
-googlecalbool = True		# Boolean for whether to check google calendar page
+barcolor = (0, 25, 0)   # RGB for bar color
+eventcolor = (0, 0, 255)  # RGB for event color
+flip = False			# Flip display (True if the strip runs from right to left)
+googlecalbool = True    # Boolean for whether to check google calendar page
 led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
@@ -100,7 +100,14 @@ def set_time():
     val = struct.unpack("!I", msg[40:44])[0]
     t = val - NTP_DELTA + GMT_OFFSET
     tm = time.gmtime(t)
-    clock = machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))
+    machine.RTC().datetime((tm[0],
+                            tm[1],
+                            tm[2],
+                            tm[6] + 1,
+                            tm[3],
+                            tm[4],
+                            tm[5],
+                            0))
     return tm[6]+1
 
 
@@ -111,7 +118,7 @@ def bar(np, upto):
             if i >= barupto:
                 np[i] = barcolor
             else:
-                np[i] = (0, 0, 0) 
+                np[i] = (0, 0, 0)
         else:
             if i <= barupto:
                 np[i] = barcolor
@@ -119,7 +126,7 @@ def bar(np, upto):
                 np[i] = (0, 0, 0)
 
 
-def addevents(np,response):
+def addevents(np, response):
     for x in response:
         index = hourtoindex(x)
         if valid(index):
@@ -186,7 +193,6 @@ def rainbow_cycle(np):
         np.write()
 
 
-
 def atwork(clockin, clockout, time):
     index = -1
     if clockin != clockout:
@@ -233,15 +239,17 @@ while True:
                 eventbool = eventnow(hoursin, response)
                 addevents(np, response)
             else:
-                # This is where you would add hardcoded events if you were not using google
+                # This is where you would add hardcoded events
+                # if you were not using google
                 eventbool = False
             if firstrun:
                 # If this was the initial update, mark it as complete
                 firstrun = False
             count = (count + 1) % 2
             # The value used to toggle lights
-            if  eventbool is True:
-                # If an event is starting, flash all LEDS otherwise just the end of the bar
+            if eventbool is True:
+                # If an event is starting, flash all LEDS
+                # otherwise just the end of the bar
                 for i in range(n):
                     np[i] = tuple(z*count for z in eventcolor)
                     # All lights
