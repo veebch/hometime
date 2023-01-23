@@ -256,11 +256,12 @@ while True:
                 time.sleep(1)
                 print("Not connecting to WiFi\nWaiting\n")
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
-            machine.reset()													# Reset at 4:44 because Jay Z, and to start afresh
+            machine.reset()						# Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
         #led.toggle()														# LED HEARTBEAT	
     except Exception as e:
         print(e)
+        machine.reset()
         off(np)
     except KeyboardInterrupt:
         off(np)
