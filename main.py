@@ -213,6 +213,7 @@ while True:
                 eventbool = eventnow(hoursin,response)
                 addevents(np,response)
             else:
+                # This is where you would add hardcoded events if you were not using google
                 eventbool =  False
             if firstrun:												# If this was the initial update, mark it as complete
                 firstrun = False
