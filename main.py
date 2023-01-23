@@ -3,7 +3,7 @@
 #  make a physical progress bar.
 #  PoC, make it better and fork
 #  GPL 3
-#
+
 import machine
 import time
 import network
@@ -76,13 +76,14 @@ schedule = {
 def whatday(weekday):
     dayindex = int(weekday)
     nameofday = [
-                    'monday',
-                    'tuesday',
-                    'wednesday',
-                    'thursday',
-                    'friday',
-                    'saturday',
-                    'sunday']
+                'monday',
+                'tuesday',
+                'wednesday',
+                'thursday',
+                'friday',
+                'saturday',
+                'sunday'
+                ]
     day = nameofday[dayindex]
     return day
 
