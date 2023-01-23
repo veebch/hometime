@@ -74,13 +74,14 @@ schedule = {
 
 def whatday(weekday):
     dayindex = int(weekday)
-    nameofday = ['monday', 
-        'tuesday',
-        'wednesday',
-        'thursday',
-        'friday',
-        'saturday',
-        'sunday']
+    nameofday = [
+                    'monday',
+                    'tuesday',
+                    'wednesday',
+                    'thursday',
+                    'friday',
+                    'saturday',
+                    'sunday']
     day = nameofday[dayindex]
     return day
 
@@ -134,12 +135,12 @@ def valid(index):
 
 def off(np):
     for i in range(n):
-        np[i] = (0, 0 , 0)
+        np[i] = (0, 0, 0)
         np.write()
 
 
 def hourtoindex(hoursin):
-    index = int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
+    index = int(math.floor(n*(float(hoursin) - clockin)/(clockout-clockin)))
     if flip is True:
         index = n - 1 - index
     if index <= 1 or index >= n:
@@ -186,10 +187,10 @@ def rainbow_cycle(np):
 
 
 
-def atwork(clockin,clockout,time):
+def atwork(clockin, clockout, time):
     index = -1
     if clockin != clockout:
-        index=hourtoindex(time)
+        index = hourtoindex(time)
     work = False
     if index > -1:
         work = True
@@ -205,7 +206,7 @@ while wlan.isconnected() is not True:
 np = neopixel.NeoPixel(machine.Pin(p), n)
 todayseventsurl = secrets.LANURL
 count = 1
-firstrun = True 
+firstrun = True
 # When you plug in, update rather than wait until the stroke of the next minute
 print("connected to WiFi: Start loop")
 off(np)
@@ -233,17 +234,17 @@ while True:
                 addevents(np, response)
             else:
                 # This is where you would add hardcoded events if you were not using google
-                eventbool =  False
+                eventbool = False
             if firstrun:
                 # If this was the initial update, mark it as complete
                 firstrun = False
-            count = (count + 1) % 2	
+            count = (count + 1) % 2
             # The value used to toggle lights
-            if  eventbool == True:
+            if  eventbool is True:
                 # If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
-                    np[i]=tuple(z*count for z in eventcolor)
-                    #All lights
+                    np[i] = tuple(z*count for z in eventcolor)
+                    # All lights
             else:
                 ledindex = min(hourtoindex(hoursin), n)
                 np[ledindex] = tuple(z*count for z in barcolor)
@@ -264,9 +265,8 @@ while True:
                 time.sleep(1)
                 print("Not connecting to WiFi\nWaiting\n")
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
-            machine.reset()						# Reset at 4:44 because Jay Z, and to start afresh
+            machine.reset()  # Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
-        #led.toggle()														# LED HEARTBEAT	
     except Exception as e:
         print(e)
         machine.reset()
