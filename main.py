@@ -1,4 +1,4 @@
-#  Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
+##  Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
 #  PoC, make it better and fork
 #  GPL 3
 import machine
@@ -7,11 +7,7 @@ import network
 import secrets
 import urequests
 import neopixel
-<<<<<<< HEAD
 import math
-=======
-import re, math
->>>>>>> 58136cc38c8c9baf2ee88f80f8e4f8a5d23157a5
 import socket
 import struct
 
@@ -20,73 +16,12 @@ GMT_OFFSET = 3600      	# hack because timezone support seems to be lacking, sec
 host = "pool.ntp.org"   # The ntp server used for grabbing time
 n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
-<<<<<<< HEAD
 clockin = 8.5			# The time work starts (hours into day)
 clockout = 16.5			# The time work ends (hours into day)
 barcolor = (0, 25, 0)   # RGB for bar color
 eventcolor = (0, 0, 255)  # RGB for event color
 flip = False			# Flip display (set to True if the strip runs from right to left)
 
-=======
-barcolor = (0, 25 ,0)	# RGB for bar color
-eventcolor = (0,0,255)	# RGB for event color
-flip=False				# Flip display (set to True if the strip runs from right to left)
-googlecalbool=True		# Boolean for whether to check google calendar page
-led = machine.Pin("LED", machine.Pin.OUT)
-led.off()
-led.on()
-time.sleep(1)
-schedule = {
-    "monday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "tuesday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "wednesday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "thursday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "friday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "saturday": [
-      {
-        "clockin": "0",
-        "clockout": "0"
-      }
-    ],
-    "sunday": [
-      {
-        "clockin": "0",
-        "clockout": "0"
-      }
-    ]
-}
-
-def whatday(weekday):
-    dayindex = int(weekday)
-    nameofday = ['monday', 'tuesday', 'wednesday', 'thursday','friday','saturday','sunday']
-    day = nameofday[dayindex]
-    return day
->>>>>>> 58136cc38c8c9baf2ee88f80f8e4f8a5d23157a5
 
 def set_time():
     NTP_QUERY = bytearray(48)
@@ -186,7 +121,6 @@ def rainbow_cycle(np):
             pixel_index = (i * 256 // n) + j
             np[i] = wheel(pixel_index & 255)
         np.write()
-<<<<<<< HEAD
 
 
 def atwork(dow, time):
@@ -197,16 +131,6 @@ def atwork(dow, time):
     else:
         if index != -1:
             work = True
-=======
-        
-def atwork(clockin,clockout,time):
-    index = -1
-    if clockin != clockout:
-        index=hourtoindex(time)
-    work = False
-    if index > -1:
-        work = True
->>>>>>> 58136cc38c8c9baf2ee88f80f8e4f8a5d23157a5
     return work
 
 
@@ -217,27 +141,16 @@ while wlan.isconnected() != True:
     time.sleep(1)
     print("Not connecting to WiFi\nWaiting\n")
 np = neopixel.NeoPixel(machine.Pin(p), n)
-<<<<<<< HEAD
 todayseventsurl = secrets.LANURL
 dayofweek = set_time()
-=======
-todayseventsurl=secrets.LANURL
->>>>>>> 58136cc38c8c9baf2ee88f80f8e4f8a5d23157a5
 count = 1
 firstrun = True   															# When you plug in, update rather than wait until the stroke of the next minute
-print("connected to WiFi: Start loop")
+print("connected: Start loop")
 off(np)
-shonetoday=True
-led.off()
-set_time()
 while True:
     try:
         now = time.gmtime()
-        dayname = whatday(int(now[6]))
-        clockin = float(schedule[dayname][0]['clockin'])
-        clockout = float(schedule[dayname][0]['clockout'])
         hoursin = float(now[3])+float(now[4])/60							# hours into the day
-<<<<<<< HEAD
         working = atwork(dayofweek, hoursin)
         if working:
             response = urequests.get(todayseventsurl).json()
@@ -246,23 +159,6 @@ while True:
             # update lights at the stroke of every minute, or on first run
             bar(np, hoursin)
             addevents(np, response)
-=======
-        print('working?')
-        working = atwork(clockin, clockout, hoursin)
-        print(working, hoursin)
-        if working is True:
-            shonetoday=False
-            # If not working, no lights will show
-            # update lights at the stroke of every minute, or on first run
-            bar(np, hoursin)
-            if googlecalbool is True:
-                response=urequests.get(todayseventsurl).json()
-                eventbool = eventnow(hoursin,response)
-                addevents(np,response)
-            else:
-                # This is where you would add hardcoded events if you were not using google
-                eventbool =  False
->>>>>>> 58136cc38c8c9baf2ee88f80f8e4f8a5d23157a5
             if firstrun:												# If this was the initial update, mark it as complete
                 firstrun = False
             count = (count + 1) % 2										# The value used to toggle lights
@@ -270,40 +166,18 @@ while True:
                 for i in range(n):
                     np[i]=tuple(z*count for z in eventcolor) 			# All lights
             else:
-<<<<<<< HEAD
                 ledindex = min(hourtoindex(hoursin), n)
                 np[ledindex]=tuple(z*count for z in barcolor) 	# Just the tip of the bar
-=======
-                ledindex = min(hourtoindex(hoursin),n)
-                np[ledindex]=tuple(z*count for z in barcolor) 			# Just the tip of the bar
->>>>>>> 58136cc38c8c9baf2ee88f80f8e4f8a5d23157a5
             np.write()
-        else:
-            if shonetoday is False:
-                led.on()
-                rainbow_cycle(np)
-                shonetoday=True
-                off(np)
-                time.sleep(600)
-        if wlan.isconnected()!= True:
-            wlan = network.WLAN(network.STA_IF)
-            wlan.active(True)
-            wlan.connect(secrets.SSID, secrets.PASSWORD)
-            while wlan.isconnected()!= True:
-                time.sleep(1)
-                print("Not connecting to WiFi\nWaiting\n")
+        if hoursin - clockout >= 0 and hoursin - clockout < (1/60):
+            rainbow_cycle(np)
+            off(np)
+            time.sleep(600)													# Sleep for 10 min
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
             machine.reset()													# Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
-        #led.toggle()														# LED HEARTBEAT	
     except Exception as e:
         print(e)
         off(np)
     except KeyboardInterrupt:
-        off(np)
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 58136cc38c8c9baf2ee88f80f8e4f8a5d23157a5
+        off(np)  Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
