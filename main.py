@@ -74,7 +74,13 @@ schedule = {
 
 def whatday(weekday):
     dayindex = int(weekday)
-    nameofday = ['monday', 'tuesday', 'wednesday', 'thursday','friday','saturday','sunday']
+    nameofday = ['monday', 
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday']
     day = nameofday[dayindex]
     return day
 
@@ -91,26 +97,25 @@ def set_time():
     finally:
         s.close()
     val = struct.unpack("!I", msg[40:44])[0]
-    t = val - NTP_DELTA  + GMT_OFFSET  
+    t = val - NTP_DELTA + GMT_OFFSET
     tm = time.gmtime(t)
-    clock = machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0  ))
+    clock = machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))
     return tm[6]+1
 
 
 def bar(np, upto):
     barupto = hourtoindex(upto)
     for i in range(n):
-        if flip ==  True:
-            if i>=barupto:
+        if flip is True:
+            if i >= barupto:
                 np[i] = barcolor
             else:
-                np[i] = (0,0,0) 
+                np[i] = (0, 0, 0) 
         else:
-            if i<=barupto:
+            if i <= barupto:
                 np[i] = barcolor
             else:
-                np[i] = (0,0,0)
-
+                np[i] = (0, 0, 0)
 
 
 def addevents(np,response):
@@ -121,7 +126,7 @@ def addevents(np,response):
 
 
 def valid(index):
-    valid=False
+    valid = False
     if index <= n and index > 0:
         valid = True
     return valid
@@ -129,20 +134,20 @@ def valid(index):
 
 def off(np):
     for i in range(n):
-        np[i]= (0, 0 , 0)
+        np[i] = (0, 0 , 0)
         np.write()
 
 
 def hourtoindex(hoursin):
-    index=int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
-    if flip ==  True:
+    index = int(math.floor(n*(float (hoursin) - clockin)/(clockout-clockin)))
+    if flip is True:
         index = n - 1 - index
     if index <= 1 or index >= n:
         index = -1
     return index
 
 
-def eventnow(hoursin,response):
+def eventnow(hoursin, response):
     event = False
     for x in response:
         if hourtoindex(x) == hourtoindex(hoursin):
