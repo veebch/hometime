@@ -93,7 +93,7 @@ def set_time():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.settimeout(1)
-        res = s.sendto(NTP_QUERY, addr)
+        s.sendto(NTP_QUERY, addr)
         msg = s.recv(48)
     finally:
         s.close()
