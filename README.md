@@ -21,7 +21,7 @@ Tap on the picture for a video of it being assembled and working as part of a ho
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from an ntp server, then shows you how far through the day you are.
 
-There's also an optional and slightly elaborate link between Google Calendar and the bar. A computer running [gcalcli](https://github.com/insanum/gcalcli) on the LAN checks the agenda every few minutes and then pops the result on a local webserver. The script on the Pico checks that file and adds event start times as coloured dots.
+There's also an optional and slightly elaborate link between Google Calendar and the bar. A computer running [gcalcli](https://github.com/insanum/gcalcli) on the LAN checks the agenda every few minutes and then pops the result on a local webserver. The script on the Pico checks that file and adds event start times as coloured dots. The file `serverscript.py` takes care of this.
 
 
 If it is outside work hours, no lights show.
