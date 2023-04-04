@@ -1,9 +1,8 @@
 #
-#  Progress Bar. Takes a pico W and a light strip to
-#  make a physical progress bar.
+#  Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
 #  PoC, make it better and fork
 #  GPL 3
-
+#
 import machine
 import time
 import network
@@ -11,18 +10,15 @@ import secrets
 import urequests
 import neopixel
 import math
-import socket
-import struct
 
-NTP_DELTA = 2208988800 	# NTP delta is 1 Jan 1970 for host
-GMT_OFFSET = 3600      	# hack, seconds relative to GMT
-host = "pool.ntp.org"   # The ntp server used for grabbing time
+# Time with daylight savings time and time zone factored in, edit this to fit where you are
+worldtimeurl = "https://timeapi.io/api/TimeZone/zone?timeZone=Europe/Zurich"   
 n = 144   				# Number of pixels on strip
 p = 15    				# GPIO pin that data line of lights is connected to
-barcolor = (0, 25, 0)   # RGB for bar color
-eventcolor = (0, 0, 255)  # RGB for event color
-flip = False			# Flip display (True if the strip runs from right to left)
-googlecalbool = True    # Boolean for whether to check google calendar page
+barcolor = (0, 25, 0)	# RGB for bar color
+eventcolor = (0, 0, 255)	# RGB for event color
+flip = False				# Flip display (set to True if the strip runs from right to left)
+googlecalbool = True		# Boolean for whether to check google calendar page
 led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
@@ -76,41 +72,41 @@ schedule = {
 def whatday(weekday):
     dayindex = int(weekday)
     nameofday = [
-                'monday',
-                'tuesday',
-                'wednesday',
-                'thursday',
-                'friday',
-                'saturday',
-                'sunday'
-                ]
+                    'monday',
+                    'tuesday',
+                    'wednesday',
+                    'thursday',
+                    'friday',
+                    'saturday',
+                    'sunday']
     day = nameofday[dayindex]
     return day
 
 
-def set_time():
-    NTP_QUERY = bytearray(48)
-    NTP_QUERY[0] = 0x1B
-    addr = socket.getaddrinfo(host, 123)[0][-1]
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.settimeout(1)
-        s.sendto(NTP_QUERY, addr)
-        msg = s.recv(48)
-    finally:
-        s.close()
-    val = struct.unpack("!I", msg[40:44])[0]
-    t = val - NTP_DELTA + GMT_OFFSET
-    tm = time.gmtime(t)
-    machine.RTC().datetime((tm[0],
-                            tm[1],
-                            tm[2],
-                            tm[6] + 1,
-                            tm[3],
-                            tm[4],
-                            tm[5],
-                            0))
-    return tm[6]+1
+def set_time(worldtimeurl):
+        time.sleep(1)
+        response = urequests.get(worldtimeurl)    
+        # parse JSON
+        parsed = response.json()
+        datetime_str = str(parsed["currentLocalTime"])
+        print(datetime_str)
+        year = int(datetime_str[0:4])
+        month = int(datetime_str[5:7])
+        day = int(datetime_str[8:10])
+        hour = int(datetime_str[11:13])
+        minute = int(datetime_str[14:16])
+        second = int(datetime_str[17:19])
+        # update internal RTC
+        machine.RTC().datetime((year,
+                      month,
+                      day,
+                      0,
+                      hour,
+                      minute,
+                      second,
+                      0))
+        dow = time.localtime()[6]
+        return dow
 
 
 def bar(np, upto):
@@ -120,7 +116,7 @@ def bar(np, upto):
             if i >= barupto:
                 np[i] = barcolor
             else:
-                np[i] = (0, 0, 0)
+                np[i] = (0, 0, 0) 
         else:
             if i <= barupto:
                 np[i] = barcolor
@@ -128,7 +124,7 @@ def bar(np, upto):
                 np[i] = (0, 0, 0)
 
 
-def addevents(np, response):
+def addevents(np,response):
     for x in response:
         index = hourtoindex(x)
         if valid(index):
@@ -195,6 +191,7 @@ def rainbow_cycle(np):
         np.write()
 
 
+
 def atwork(clockin, clockout, time):
     index = -1
     if clockin != clockout:
@@ -220,7 +217,8 @@ print("connected to WiFi: Start loop")
 off(np)
 shonetoday = True
 led.off()
-set_time()
+set_time(worldtimeurl)
+print(time.localtime())
 while True:
     try:
         now = time.gmtime()
@@ -241,17 +239,15 @@ while True:
                 eventbool = eventnow(hoursin, response)
                 addevents(np, response)
             else:
-                # This is where you would add hardcoded events
-                # if you were not using google
+                # This is where you would add hardcoded events if you were not using google
                 eventbool = False
             if firstrun:
                 # If this was the initial update, mark it as complete
                 firstrun = False
             count = (count + 1) % 2
             # The value used to toggle lights
-            if eventbool is True:
-                # If an event is starting, flash all LEDS
-                # otherwise just the end of the bar
+            if  eventbool is True:
+                # If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
                     np[i] = tuple(z*count for z in eventcolor)
                     # All lights
