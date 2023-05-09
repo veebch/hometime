@@ -53,7 +53,7 @@ git clone https://github.com/veebch/hometime.git
 cd hometime
 mv config_example.py config.py
 ```
-Edit config.py to contain your WiFi credentials and other parameters. 
+Edit config.py to contain your WiFi credentials and other parameters. If you are going to use the Google Calendar functionality, you'll need an API key and a public Google Calendar address.
 
 Check the port of the pico with the port listing command:
 ```
