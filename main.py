@@ -1,28 +1,34 @@
 #
 #  Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
-#  PoC, make it better and fork
+#  PoC, fork and make it better
 #  GPL 3
 #
 import machine
 import time
 import network
-import secrets
+import config
 import urequests
 import neopixel
 import math
 
 # Time with daylight savings time and time zone factored in, edit this to fit where you are
-worldtimeurl = "https://timeapi.io/api/TimeZone/zone?timeZone=Europe/Zurich"   
-n = 144   				# Number of pixels on strip
-p = 15    				# GPIO pin that data line of lights is connected to
-barcolor = (0, 25, 0)	# RGB for bar color
-eventcolor = (0, 0, 255)	# RGB for event color
-flip = False				# Flip display (set to True if the strip runs from right to left)
-googlecalbool = True		# Boolean for whether to check google calendar page
+worldtimeurl = config.CLOCK
+# The ID of the public Google Calendar to be used
+calendar = config.CALENDAR
+# The API key for google... Not sure why it is needed, but it seems to be
+api_key = config.APIKEY
+n = config.PIXELS           # Number of pixels on strip
+p = config.GPIOPIN          # GPIO pin that data line of lights is connected to
+barcolor = config.BARCOL    # RGB for bar color
+eventcolor = config.EVENTCOL# RGB for event color
+flip = False                # Flip display (set to True if the strip runs from right to left)
+googlecalbool = True        # Boolean for whether to check google calendar page
 led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
 time.sleep(1)
+eventbool = False # Initialising, no need to edit
+checkgoogleevery = 10
 schedule = {
     "monday": [
       {
@@ -69,6 +75,34 @@ schedule = {
 }
 
 
+def get_today_appointment_times(calendar_id, api_key):
+    # Get the date from the RTC
+    rtc = machine.RTC()
+    year, month, day, _, hour, minute, _, _ = rtc.datetime()
+
+    # Format the date
+    date = "{:04d}-{:02d}-{:02d}".format(year, month, day)
+
+    # Format the request URL
+    url = f"https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events"
+    url += f"?timeMin={date}T00:00:00Z&timeMax={date}T23:59:59Z&key={api_key}"
+
+
+    # Send the request
+    print(url)
+    response = urequests.get(url)
+    data = response.json()
+    print(data)
+
+    # Extract the appointment times
+    appointment_times = []
+    for item in data.get("items", []):
+         start = item["start"].get("dateTime", item["start"].get("date"))
+         appointment_times.append(start)
+    print(appointment_times)
+    return appointment_times
+
+
 def whatday(weekday):
     dayindex = int(weekday)
     nameofday = [
@@ -84,10 +118,12 @@ def whatday(weekday):
 
 
 def set_time(worldtimeurl):
-        time.sleep(1)
-        response = urequests.get(worldtimeurl)    
+        print(worldtimeurl)
+        response = urequests.get(worldtimeurl)
+        print(response) 
         # parse JSON
         parsed = response.json()
+        print(parsed)
         datetime_str = str(parsed["currentLocalTime"])
         print(datetime_str)
         year = int(datetime_str[0:4])
@@ -106,6 +142,7 @@ def set_time(worldtimeurl):
                       second,
                       0))
         dow = time.localtime()[6]
+        print('SET')
         return dow
 
 
@@ -124,9 +161,25 @@ def bar(np, upto):
                 np[i] = (0, 0, 0)
 
 
+def timetohour(time_string):
+
+    # Extract the time portion from the string
+    time_part = time_string.split("T")[1].split("+")[0]
+
+    # Split the time into hours, minutes, and seconds
+    hours, minutes, seconds = time_part.split(":")
+
+    parsed_time = int(hours)+int(minutes)/60+int(seconds)/3600
+
+    return parsed_time
+
+
 def addevents(np,response):
     for x in response:
-        index = hourtoindex(x)
+        print(x)
+        hour = timetohour(x)
+        index = hourtoindex(hour)
+        print("INDEX: ",index)
         if valid(index):
             np[index] = eventcolor
 
@@ -139,13 +192,14 @@ def valid(index):
 
 
 def off(np):
+    print('turnoff')
     for i in range(n):
         np[i] = (0, 0, 0)
         np.write()
 
 
 def hourtoindex(hoursin):
-    index = int(math.floor(n*(float(hoursin) - clockin)/(clockout-clockin)))
+    index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if flip is True:
         index = n - 1 - index
     if index <= 1 or index >= n:
@@ -191,7 +245,6 @@ def rainbow_cycle(np):
         np.write()
 
 
-
 def atwork(clockin, clockout, time):
     index = -1
     if clockin != clockout:
@@ -204,23 +257,27 @@ def atwork(clockin, clockout, time):
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect(secrets.SSID, secrets.PASSWORD)
+wlan.connect(config.SSID, config.PASSWORD)
 while wlan.isconnected() is not True:
     time.sleep(1)
     print("Not connecting to WiFi\nWaiting\n")
 np = neopixel.NeoPixel(machine.Pin(p), n)
-todayseventsurl = secrets.LANURL
 count = 1
 firstrun = True
 # When you plug in, update rather than wait until the stroke of the next minute
 print("connected to WiFi: Start loop")
+time.sleep(1)
 off(np)
 shonetoday = True
 led.off()
 set_time(worldtimeurl)
 print(time.localtime())
+# appointment_times = get_today_appointment_times(calendar, api_key)
+# print(appointment_times)
+googleindex = 0
 while True:
     try:
+        googleindex = googleindex + 1
         now = time.gmtime()
         dayname = whatday(int(now[6]))
         clockin = float(schedule[dayname][0]['clockin'])
@@ -234,13 +291,15 @@ while True:
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
             bar(np, hoursin)
+            if (googlecalbool is True) & (googleindex == 1):
+                appointment_times = get_today_appointment_times(calendar, api_key)
+                time.sleep(1)
+                #eventbool = eventnow(hoursin, appointment_times)
+                print('getgoogle')
+            if (googleindex > checkgoogleevery):
+                googleindex = 0
             if googlecalbool is True:
-                response = urequests.get(todayseventsurl).json()
-                eventbool = eventnow(hoursin, response)
-                addevents(np, response)
-            else:
-                # This is where you would add hardcoded events if you were not using google
-                eventbool = False
+                addevents(np, appointment_times)
             if firstrun:
                 # If this was the initial update, mark it as complete
                 firstrun = False
@@ -266,7 +325,7 @@ while True:
         if wlan.isconnected() is not True:
             wlan = network.WLAN(network.STA_IF)
             wlan.active(True)
-            wlan.connect(secrets.SSID, secrets.PASSWORD)
+            wlan.connect(config.SSID, config.PASSWORD)
             while wlan.isconnected() is not True:
                 time.sleep(1)
                 print("Not connecting to WiFi\nWaiting\n")
@@ -275,7 +334,8 @@ while True:
         time.sleep(1)
     except Exception as e:
         print(e)
-        machine.reset()
         off(np)
+        time.sleep(1)
+        machine.reset()
     except KeyboardInterrupt:
         off(np)
