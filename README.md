@@ -5,7 +5,7 @@
 
 # Hometime: A work/school day progress bar
 
-A physical LED progress bar for the working day that includes information from any Public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
+A physical LED progress bar for the working day that includes information from a public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
 
 - keeps you posted on how much of the workday has already passed, 
 - flashes when it's time for an event on the Calendar, 
