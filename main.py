@@ -56,6 +56,8 @@ def get_today_appointment_times(calendar_id, api_key):
     for item in data.get("items", []):
          start = item["start"].get("dateTime", item["start"].get("date"))
          appointment_times.append(start)
+         start = item["end"].get("dateTime", item["end"].get("date"))
+         appointment_times.append(start)
     print(appointment_times)
     return appointment_times
 
@@ -132,14 +134,26 @@ def timetohour(time_string):
 
 
 def addevents(np,response):
+    indexes = []
     for x in response:
         print(x)
         hour = timetohour(x)
         index = hourtoindex(hour)
-        print("INDEX: ",index)
         if valid(index):
-            np[index] = eventcolor
-
+            indexes.append(index)
+    print(indexes)
+    #pop out pairs of values and paint in meetings
+    try:
+        while True:
+            end = indexes.pop()
+            start= indexes.pop()
+            for i in range(start,end):
+                if valid(i):
+                    np[i] = eventcolor
+    except:
+        print('done')
+        
+    
 
 def valid(index):
     valid = False
@@ -252,7 +266,7 @@ while True:
             if (googlecalbool is True) & (googleindex == 1):
                 appointment_times = get_today_appointment_times(calendar, api_key)
                 time.sleep(1)
-                eventbool = eventnow(hoursin, appointment_times)
+                eventbool = eventnow(hoursin, appointment_times[1::2]) # only the odd elements (starttimes)
                 print('getgoogle')
             if (googleindex > checkgoogleevery):
                 googleindex = 0
