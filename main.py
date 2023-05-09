@@ -21,58 +21,15 @@ n = config.PIXELS           # Number of pixels on strip
 p = config.GPIOPIN          # GPIO pin that data line of lights is connected to
 barcolor = config.BARCOL    # RGB for bar color
 eventcolor = config.EVENTCOL# RGB for event color
-flip = False                # Flip display (set to True if the strip runs from right to left)
-googlecalbool = True        # Boolean for whether to check google calendar page
+schedule = config.SCHEDULE  # Working hours in config file
+flip = config.FLIP
+googlecalbool = config.GOOGLECALBOOL
 led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
 checkgoogleevery = 10
-schedule = {
-    "monday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "tuesday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "wednesday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "thursday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "friday": [
-      {
-        "clockin": "9",
-        "clockout": "17"
-      }
-    ],
-    "saturday": [
-      {
-        "clockin": "0",
-        "clockout": "0"
-      }
-    ],
-    "sunday": [
-      {
-        "clockin": "0",
-        "clockout": "0"
-      }
-    ]
-}
 
 
 def get_today_appointment_times(calendar_id, api_key):
@@ -339,3 +296,4 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
+
