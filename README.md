@@ -29,7 +29,7 @@ If it is outside work hours, no lights show.
 ## Hardware
 
 - Raspberry Pi Pico W
-- 1 m, 144 LED, 5V Addressable LED strip (we used a WS2812B Eco)
+- 5V Addressable LED strip (we used a 1 m, 144 LED, WS2812B Eco).
 
 ## Assembly
 
