@@ -5,10 +5,10 @@
 
 # Hometime: A work/school day progress bar
 
-A physical LED progress bar for the working day that includes information from Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
+A physical LED progress bar for the working day that includes information from a public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
 
 - keeps you posted on how much of the workday has already passed, 
-- flashes when it's time for an event, 
+- flashes when it's time for an event on the Calendar, 
 - rewards you with a pretty rainbow at hometime.
 
 ## Video
@@ -21,7 +21,7 @@ Tap on the picture for a video of it being assembled and working as part of a ho
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from a [time api](https://timeapi.io), then shows you how far through the day you are.
 
-There's also an optional and slightly elaborate link between Google Calendar and the bar. A computer running [gcalcli](https://github.com/insanum/gcalcli) on the LAN checks the agenda every few minutes and then pops the result on a local webserver. The script on the Pico checks that file and adds event start times as coloured dots. The file `serverscript.py` takes care of this.
+The events are maintained in a public Google calendar, and connection parameters are stored in the config file.
 
 
 If it is outside work hours, no lights show.
@@ -51,9 +51,9 @@ Clone this repository to your computer using the commands (from a terminal):
 cd ~
 git clone https://github.com/veebch/hometime.git
 cd hometime
-mv secrets_example.py secrets.py
+mv config_example.py config.py
 ```
-Edit secrets.py to contain your WiFi credentials and (optionally) the url of your Google Calendar schedule. The schedule is created by running serverscript.py on a machine with gcalcli on, and a web server. For automation **systemd** or **cron** will automate running `serverscript.py` nicely. 
+Edit config.py to contain your WiFi credentials and other parameters. 
 
 Check the port of the pico with the port listing command:
 ```
@@ -63,7 +63,7 @@ Now, using the port path (in our case `/dev/ttyACM0`) copy the contents to the r
 
 ```
 ampy -p /dev/ttyACM0 put main.py 
-ampy -p /dev/ttyACM0 put secrets.py
+ampy -p /dev/ttyACM0 put config.py
 ```
 (*nb. make sure you are using the right port name, as shown in the port listing command above*)
 
@@ -71,4 +71,4 @@ Done! All the required files should now be on the Pico. Whenever you sconnect to
 
 ## Configuration
 
-You can edit the code to give your start/end time for each day. That, and a number of other parameters are in `main.py`
+You can edit the code to give your start/end time for each day. That, and a number of other parameters are in `config.py`
