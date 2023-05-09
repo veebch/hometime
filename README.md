@@ -23,7 +23,6 @@ The progress bar displays your progress through the working day. It connects to 
 
 The events are maintained in a public Google calendar, and connection parameters are stored in the config file.
 
-
 If it is outside the working hours defined in the config file, no lights show.
 
 ## Hardware
@@ -53,7 +52,7 @@ git clone https://github.com/veebch/hometime.git
 cd hometime
 mv config_example.py config.py
 ```
-Edit config.py to contain your WiFi credentials and other parameters. If you are going to use the Google Calendar functionality, you'll need an API key and a public Google Calendar address.
+Edit config.py to contain your WiFi credentials and other parameters. If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
 
 Check the port of the pico with the port listing command:
 ```
