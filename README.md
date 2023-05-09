@@ -24,7 +24,7 @@ The progress bar displays your progress through the working day. It connects to 
 The events are maintained in a public Google calendar, and connection parameters are stored in the config file.
 
 
-If it is outside work hours, no lights show.
+If it is outside the working hours defined in the config file, no lights show.
 
 ## Hardware
 
