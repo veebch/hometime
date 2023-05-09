@@ -49,8 +49,6 @@ def get_today_appointment_times(calendar_id, api_key):
     print(url)
     response = urequests.get(url)
     data = response.json()
-    print(data)
-
     # Extract the appointment times
     appointment_times = []
     for item in data.get("items", []):
@@ -77,14 +75,11 @@ def whatday(weekday):
 
 
 def set_time(worldtimeurl):
-        print(worldtimeurl)
-        response = urequests.get(worldtimeurl)
-        print(response) 
+        print('Grab time:',worldtimeurl)
+        response = urequests.get(worldtimeurl) 
         # parse JSON
         parsed = response.json()
-        print(parsed)
         datetime_str = str(parsed["currentLocalTime"])
-        print(datetime_str)
         year = int(datetime_str[0:4])
         month = int(datetime_str[5:7])
         day = int(datetime_str[8:10])
@@ -101,7 +96,6 @@ def set_time(worldtimeurl):
                       second,
                       0))
         dow = time.localtime()[6]
-        print('SET')
         return dow
 
 
@@ -163,7 +157,7 @@ def valid(index):
 
 
 def off(np):
-    print('turnoff')
+    print('Turn off all LEDs')
     for i in range(n):
         np[i] = (0, 0, 0)
         np.write()
@@ -232,12 +226,12 @@ wlan.active(True)
 wlan.connect(config.SSID, config.PASSWORD)
 while wlan.isconnected() is not True:
     time.sleep(1)
-    print("Not connecting to WiFi\nWaiting\n")
+    print("Waiting for WiFi")
 np = neopixel.NeoPixel(machine.Pin(p), n)
 count = 1
 firstrun = True
 # When you plug in, update rather than wait until the stroke of the next minute
-print("connected to WiFi: Start loop")
+print("Connected to WiFi")
 time.sleep(1)
 off(np)
 shonetoday = True
@@ -247,6 +241,7 @@ print(time.localtime())
 # appointment_times = get_today_appointment_times(calendar, api_key)
 # print(appointment_times)
 googleindex = 0
+print('Begin endless loop')
 while True:
     try:
         googleindex = googleindex + 1
@@ -255,9 +250,7 @@ while True:
         clockin = float(schedule[dayname][0]['clockin'])
         clockout = float(schedule[dayname][0]['clockout'])
         hoursin = float(now[3])+float(now[4])/60  # hours into the day
-        print('working?')
         working = atwork(clockin, clockout, hoursin)
-        print(working, hoursin)
         if working is True:
             shonetoday = False
             # If not working, no lights will show
@@ -311,4 +304,5 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
+
 
