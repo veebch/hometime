@@ -167,7 +167,8 @@ def hourtoindex(hoursin):
 def eventnow(hoursin, response):
     event = False
     for x in response:
-        if hourtoindex(x) == hourtoindex(hoursin):
+        hour = timetohour(x)
+        if hourtoindex(hour) == hourtoindex(hoursin):
             event = True
     return event
 
@@ -251,7 +252,7 @@ while True:
             if (googlecalbool is True) & (googleindex == 1):
                 appointment_times = get_today_appointment_times(calendar, api_key)
                 time.sleep(1)
-                #eventbool = eventnow(hoursin, appointment_times)
+                eventbool = eventnow(hoursin, appointment_times)
                 print('getgoogle')
             if (googleindex > checkgoogleevery):
                 googleindex = 0
