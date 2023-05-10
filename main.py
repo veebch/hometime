@@ -101,17 +101,12 @@ def set_time(worldtimeurl):
 
 def bar(np, upto):
     barupto = hourtoindex(upto)
-    for i in range(n):
+    for i in range(barupto):
         if flip is True:
-            if i >= barupto:
-                np[i] = barcolor
-            else:
-                np[i] = (0, 0, 0) 
+            np[n-i] = barcolor
         else:
-            if i <= barupto:
-                np[i] = barcolor
-            else:
-                np[i] = (0, 0, 0)
+            np[i] = barcolor
+
 
 
 def timetohour(time_string):
@@ -244,6 +239,8 @@ googleindex = 0
 print('Begin endless loop')
 while True:
     try:
+        for i in range(n):
+            np[i] = (0, 0, 0)
         googleindex = googleindex + 1
         now = time.gmtime()
         dayname = whatday(int(now[6]))
@@ -255,7 +252,6 @@ while True:
             shonetoday = False
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
-            bar(np, hoursin)
             if (googlecalbool is True) & (googleindex == 1):
                 appointment_times = get_today_appointment_times(calendar, api_key)
                 time.sleep(1)
@@ -270,6 +266,7 @@ while True:
                 firstrun = False
             count = (count + 1) % 2
             # The value used to toggle lights
+            bar(np, hoursin)
             if  eventbool is True:
                 # If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
