@@ -20,7 +20,7 @@ api_key = config.APIKEY
 n = config.PIXELS           # Number of pixels on strip
 p = config.GPIOPIN          # GPIO pin that data line of lights is connected to
 barcolor = config.BARCOL    # RGB for bar color
-eventcolor = config.EVENTCOL# RGB for event color
+eventcollist = config.EVENTCOL# RGB for event color
 schedule = config.SCHEDULE  # Working hours in config file
 flip = config.FLIP
 googlecalbool = config.GOOGLECALBOOL
@@ -133,12 +133,14 @@ def addevents(np,response):
     print(indexes)
     #pop out pairs of values and paint in meetings
     try:
+        index = 0
         while True:
             end = indexes.pop()
             start= indexes.pop()
             for i in range(start,end):
                 if valid(i):
-                    np[i] = eventcolor
+                    np[i] = eventcollist[index % len(eventcollist)]
+            index = (index + 1) 
     except:
         print('done')
         
@@ -270,7 +272,7 @@ while True:
             if  eventbool is True:
                 # If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
-                    np[i] = tuple(z*count for z in eventcolor)
+                    np[i] = tuple(z*count for z in eventcollist[1])
                     # All lights
             else:
                 ledindex = min(hourtoindex(hoursin), n)
