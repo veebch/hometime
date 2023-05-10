@@ -7,7 +7,7 @@ CLOCK = "https://timeapi.io/api/TimeZone/zone?timeZone=Europe/Zurich"
 PIXELS = 144
 GPIOPIN = 15
 BARCOL = (0,100,0)
-EVENTCOL = (0, 0, 255)
+EVENTCOL =[(255, 255, 255),(255,255,0)] # list of tuples used as meeting colours
 FLIP = False                # Flip display (set to True if the strip runs from right to left)
 GOOGLECALBOOL = True        # Boolean for whether to check google calendar page
 SCHEDULE = {
