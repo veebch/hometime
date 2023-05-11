@@ -257,7 +257,7 @@ while True:
             if (googlecalbool is True) & (googleindex == 1):
                 appointment_times = get_today_appointment_times(calendar, api_key)
                 time.sleep(1)
-                eventbool = eventnow(hoursin, appointment_times[1::2]) # only the odd elements (starttimes)
+                eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                 print('getgoogle')
             if (googleindex > checkgoogleevery):
                 googleindex = 0
@@ -303,5 +303,3 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
-
-
