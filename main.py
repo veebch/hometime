@@ -21,7 +21,7 @@ n = config.PIXELS           # Number of pixels on strip
 p = config.GPIOPIN          # GPIO pin that data line of lights is connected to
 barcolor = config.BARCOL    # RGB for bar color
 eventcollist = config.EVENTCOL# RGB for event color
-schedule = config.SCHEDULE  # Working hours in config file
+schedule = config.SCHEDULE  # Working hours in config file (only used if google calendar not used)
 flip = config.FLIP
 googlecalbool = config.GOOGLECALBOOL
 led = machine.Pin("LED", machine.Pin.OUT)
@@ -248,23 +248,27 @@ while True:
         googleindex = googleindex + 1
         now = time.gmtime()
         dayname = whatday(int(now[6]))
-        clockin = float(schedule[dayname][0]['clockin'])
-        clockout = float(schedule[dayname][0]['clockout'])
         hoursin = float(now[3])+float(now[4])/60  # hours into the day
+        if (googlecalbool is True) & (googleindex == 1):
+            appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
+            time.sleep(1)
+            print('getgoogle')
+        if (googleindex > checkgoogleevery):
+            googleindex = 0
+        if googlecalbool is True:
+            clockin = timetohour(appointment_times[0])
+            clockout = timetohour(appointment_times[-1])
+            print('clockin',clockin)
+            addevents(np, appointment_times)
+        else:
+            clockin = float(schedule[dayname][0]['clockin'])
+            clockout = float(schedule[dayname][0]['clockout'])
+        eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
         working = atwork(clockin, clockout, hoursin)
         if working is True:
             shonetoday = False
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
-            if (googlecalbool is True) & (googleindex == 1):
-                appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
-                time.sleep(1)
-                eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
-                print('getgoogle')
-            if (googleindex > checkgoogleevery):
-                googleindex = 0
-            if googlecalbool is True:
-                addevents(np, appointment_times)
             if firstrun:
                 # If this was the initial update, mark it as complete
                 firstrun = False
