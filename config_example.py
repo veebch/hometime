@@ -2,7 +2,7 @@ SSID = "wifissid"
 PASSWORD = "trustnoone"
 CALENDAR = "INSERT YOUR CALENDAR NAME"
 APIKEY = "INSERT YOUR APIKEY"
-CLOCK = "https://timeapi.io/api/TimeZone/zone?timeZone=Europe/Zurich"
+TIMEZONE = "Europe/Zurich"
 # Lighting
 PIXELS = 144
 GPIOPIN = 15
@@ -54,3 +54,4 @@ SCHEDULE = {
       }
     ]
 }
+
