@@ -12,7 +12,7 @@ import neopixel
 import math
 
 # Time with daylight savings time and time zone factored in, edit this to fit where you are
-worldtimeurl = config.CLOCK
+worldtimeurl = "https://timeapi.io/api/TimeZone/zone?timezone=" + config.TIMEZONE
 # The ID of the public Google Calendar to be used
 calendar = config.CALENDAR
 # The API key for google... Not sure why it is needed, but it seems to be
@@ -32,8 +32,21 @@ eventbool = False # Initialising, no need to edit
 checkgoogleevery = 10
 
 
-def get_today_appointment_times(calendar_id, api_key):
+def twodigits(digit):    # Takes an integer and turns it into a two digit string (or a two digit number and does nothing to it). 
+    digit = int(digit)
+    digitstring=str(digit)        
+    if (digit*digit) < 100:
+        digitstring= "0"+digitstring
+    return digitstring
+
+
+def get_today_appointment_times(calendar_id, api_key, offset):
     # Get the date from the RTC
+    if offset >= 0:
+        offsetstring = "+" + twodigits(offset) + ":00"
+    else:
+        offsetstring = "-" + twodigits(offset) + ":00"
+    print(offsetstring)
     rtc = machine.RTC()
     year, month, day, _, hour, minute, _, _ = rtc.datetime()
 
@@ -42,7 +55,7 @@ def get_today_appointment_times(calendar_id, api_key):
 
     # Format the request URL
     url = f"https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events"
-    url += f"?timeMin={date}T00:00:00Z&timeMax={date}T23:59:59Z&key={api_key}"
+    url += f"?timeMin={date}T00:00:00{offsetstring}&timeMax={date}T23:59:59{offsetstring}&key={api_key}"
 
 
     # Send the request
@@ -86,6 +99,8 @@ def set_time(worldtimeurl):
         hour = int(datetime_str[11:13])
         minute = int(datetime_str[14:16])
         second = int(datetime_str[17:19])
+        offset = int(parsed["currentUtcOffset"]["seconds"])/3600
+        print(offset)
         # update internal RTC
         machine.RTC().datetime((year,
                       month,
@@ -96,7 +111,7 @@ def set_time(worldtimeurl):
                       second,
                       0))
         dow = time.localtime()[6]
-        return dow
+        return dow,offset
 
 
 def bar(np, upto):
@@ -233,7 +248,7 @@ time.sleep(1)
 off(np)
 shonetoday = True
 led.off()
-set_time(worldtimeurl)
+dow, offset = set_time(worldtimeurl)
 print(time.localtime())
 # appointment_times = get_today_appointment_times(calendar, api_key)
 # print(appointment_times)
@@ -255,9 +270,9 @@ while True:
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
             if (googlecalbool is True) & (googleindex == 1):
-                appointment_times = get_today_appointment_times(calendar, api_key)
+                appointment_times = get_today_appointment_times(calendar, api_key,offset)
                 time.sleep(1)
-                eventbool = eventnow(hoursin, appointment_times[1::2]) # only the odd elements (starttimes)
+                eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                 print('getgoogle')
             if (googleindex > checkgoogleevery):
                 googleindex = 0
