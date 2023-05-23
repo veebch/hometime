@@ -32,21 +32,8 @@ eventbool = False # Initialising, no need to edit
 checkgoogleevery = 10
 
 
-def twodigits(digit):    # Takes an integer and turns it into a two digit string (or a two digit number and does nothing to it). 
-    digit = int(digit)
-    digitstring=str(digit)        
-    if (digit*digit) < 100:
-        digitstring= "0"+digitstring
-    return digitstring
-
-
-def get_today_appointment_times(calendar_id, api_key, offset):
+def get_today_appointment_times(calendar_id, api_key, tz):
     # Get the date from the RTC
-    if offset >= 0:
-        offsetstring = "+" + twodigits(offset) + ":00"
-    else:
-        offsetstring = "-" + twodigits(offset) + ":00"
-    print(offsetstring)
     rtc = machine.RTC()
     year, month, day, _, hour, minute, _, _ = rtc.datetime()
 
@@ -55,7 +42,7 @@ def get_today_appointment_times(calendar_id, api_key, offset):
 
     # Format the request URL
     url = f"https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events"
-    url += f"?timeMin={date}T00:00:00{offsetstring}&timeMax={date}T23:59:59{offsetstring}&key={api_key}"
+    url += f"?timeMin={date}T00:00:00Z&timeMax={date}T23:59:59Z&timeZone={tz}&key={api_key}"
 
 
     # Send the request
@@ -270,7 +257,7 @@ while True:
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
             if (googlecalbool is True) & (googleindex == 1):
-                appointment_times = get_today_appointment_times(calendar, api_key,offset)
+                appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                 time.sleep(1)
                 eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                 print('getgoogle')
@@ -318,3 +305,5 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
+
+
