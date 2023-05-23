@@ -318,5 +318,3 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
-
-

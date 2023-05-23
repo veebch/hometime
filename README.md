@@ -8,12 +8,12 @@
 A physical LED progress bar for the working day that includes information from a public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
 
 - keeps you posted on how much of the workday has already passed, 
-- flashes when it's time for an event on the Calendar, 
+- flashes when it's time for an event on the calendar, 
 - rewards you with a pretty rainbow at hometime.
 
 ## Video
 
-Tap on the picture for a video of it being assembled and working as part of a home made whiteboard.
+Tap on the picture for a video of it being assembled and working as part of a home made whiteboard. Since the video was made, there have been some improvements to how meetings are displayed.
 
 [![Video](images/video.png)](https://www.youtube.com/watch?v=MDij1lKcI70)
 
@@ -21,7 +21,7 @@ Tap on the picture for a video of it being assembled and working as part of a ho
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from a [time api](https://timeapi.io), then shows you how far through the day you are.
 
-The events are maintained in a public Google calendar, and connection parameters are stored in the config file.
+The events are maintained in a public Google calendar, and connection parameters are stored in the config file. For getting an API key, visit https://console.cloud.google.com/apis/credentials.
 
 If it is outside the working hours defined in the config file, no lights show.
 
@@ -70,4 +70,4 @@ Done! All the required files should now be on the Pico. Whenever you sconnect to
 
 ## Configuration
 
-You can edit the code to give your start/end time for each day. That, and a number of other parameters are in `config.py`
+Parameters are in `config.py`
