@@ -21,7 +21,7 @@ Tap on the picture for a video of it being assembled and working as part of a ho
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from a [time api](https://timeapi.io), then shows you how far through the day you are.
 
-The events are maintained in a public Google calendar, and connection parameters are stored in the config file.
+The events are maintained in a public Google calendar, and connection parameters are stored in the config file. For getting an API key, visit https://console.cloud.google.com/apis/credentials.
 
 If it is outside the working hours defined in the config file, no lights show.
 
