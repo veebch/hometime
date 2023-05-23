@@ -127,7 +127,7 @@ def timetohour(time_string):
 def addevents(np,response):
     indexes = []
     for x in response:
-        print(x)
+        print('Event',x)
         hour = timetohour(x)
         index = hourtoindex(hour)
         if valid(index):
@@ -150,7 +150,7 @@ def addevents(np,response):
 
 def valid(index):
     valid = False
-    if index <= n and index > 0:
+    if index <= n and index >= 0:
         valid = True
     return valid
 
@@ -166,7 +166,7 @@ def hourtoindex(hoursin):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if flip is True:
         index = n - 1 - index
-    if index <= 1 or index >= n:
+    if index < 0 or index > n:
         index = -1
     return index
 
@@ -239,7 +239,7 @@ dow, offset = set_time(worldtimeurl)
 print(time.localtime())
 # appointment_times = get_today_appointment_times(calendar, api_key)
 # print(appointment_times)
-googleindex = 0
+googleindex = 0 
 print('Begin endless loop')
 while True:
     try:
@@ -259,6 +259,7 @@ while True:
             clockin = timetohour(appointment_times[0])
             clockout = timetohour(appointment_times[-1])
             print('clockin',clockin)
+            print('clockout', clockout)
             addevents(np, appointment_times)
         else:
             clockin = float(schedule[dayname][0]['clockin'])
@@ -292,13 +293,6 @@ while True:
                 shonetoday = True
                 off(np)
                 time.sleep(600)
-        if wlan.isconnected() is not True:
-            wlan = network.WLAN(network.STA_IF)
-            wlan.active(True)
-            wlan.connect(config.SSID, config.PASSWORD)
-            while wlan.isconnected() is not True:
-                time.sleep(1)
-                print("Not connecting to WiFi\nWaiting\n")
         if now[5] == 0 and now[4] == 44 and now[3] == 4:
             machine.reset()  # Reset at 4:44 because Jay Z, and to start afresh
         time.sleep(1)
