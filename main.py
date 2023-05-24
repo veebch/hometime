@@ -247,7 +247,7 @@ while True:
         googleindex = googleindex + 1
         now = time.gmtime()
         dayname = whatday(int(now[6]))
-        hoursin = float(now[3])+float(now[4])/60  # hours into the day
+        hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
         if (googlecalbool is True) & (googleindex == 1):
             appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
             time.sleep(1)
@@ -255,6 +255,7 @@ while True:
         if (googleindex > checkgoogleevery):
             googleindex = 0
         if googlecalbool is True:
+            appointment_times = sorted(appointment_times)
             clockin = timetohour(appointment_times[0])
             clockout = timetohour(appointment_times[-1])
             print('clockin',clockin)
