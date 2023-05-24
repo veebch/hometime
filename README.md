@@ -17,6 +17,7 @@ Tap on the picture for a video of it being assembled and working as part of a ho
 
 [![Video](images/video.png)](https://www.youtube.com/watch?v=MDij1lKcI70)
 
+
 ## How it works
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from a [time api](https://timeapi.io), then shows you how far through the day you are.
