@@ -3,11 +3,11 @@
 [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/v_e_e_b/)
 
 
-# Hometime: A work/school day progress bar that talks to Google Calendar
+# Hometime: A work/school day progress bar linked to a Google Calendar
 
-A physical LED progress bar for the working day that includes information from a public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
+A physical LED progress bar for the working day based on information from a public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
 
-- keeps you posted on how much of the workday has already passed, 
+- keeps you posted on how much of the workday (start of first meeting to end of last meeting) has already passed, 
 - flashes when it's time for an event on the calendar, 
 - rewards you with a pretty rainbow at hometime.
 
@@ -23,7 +23,7 @@ The progress bar displays your progress through the working day. It connects to 
 
 The events are maintained in a public Google calendar, and connection parameters are stored in the config file. For getting an API key, visit https://console.cloud.google.com/apis/credentials.
 
-If it is outside the working hours defined in the config file, no lights show.
+If it is outside the working hours, no lights show.
 
 ## Hardware
 
@@ -64,10 +64,10 @@ Now, using the port path (in our case `/dev/ttyACM0`) copy the contents to the r
 ampy -p /dev/ttyACM0 put main.py 
 ampy -p /dev/ttyACM0 put config.py
 ```
-(*nb. make sure you are using the right port name, as shown in the port listing command above*)
+(*NB. make sure you are using the right port name, as shown in the port listing command above*)
 
 Done! All the required files should now be on the Pico. Whenever you sconnect to USB power the script will autorun.
 
 ## Configuration
 
-Parameters are in `config.py`
+Parameters are in `config.py`. You can set the calendar use to False and rely on hardcoded clock in/out times.
