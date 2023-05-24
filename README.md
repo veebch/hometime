@@ -13,7 +13,7 @@ A physical LED progress bar for the working day based on information from a publ
 
 ## Videos
 
-Tap on the picture for a video of it being assembled and working as part of a home made whiteboard. Since the video was made, there have been some improvements to how meetings are displayed.
+Tap on the picture for a video of it being assembled and working as part of a home made whiteboard. Since the video was made, there have been some improvements to how meetings are displayed, that is shown in the second short video.
 
 [![Video](images/video.png)](https://www.youtube.com/watch?v=MDij1lKcI70)
 
