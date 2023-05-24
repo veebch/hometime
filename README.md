@@ -70,4 +70,4 @@ Done! All the required files should now be on the Pico. Whenever you sconnect to
 
 ## Configuration
 
-Parameters are in `config.py`, you can set the calendar use to False and rely on hardcoded clock in/out times.
+Parameters are in `config.py`. You can set the calendar use to False and rely on hardcoded clock in/out times.
