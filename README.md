@@ -3,7 +3,7 @@
 [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/v_e_e_b/)
 
 
-# Hometime: A work/school day progress bar based on Google Calendar
+# Hometime: A work/school day progress bar linked to a Google Calendar
 
 A physical LED progress bar for the working day based on information from a public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
 
