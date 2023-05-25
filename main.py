@@ -245,8 +245,8 @@ time.sleep(1)
 off(np)
 led.off()
 dow, offset = set_time(worldtimeurl)
-print(time.localtime())
-googleindex = 0 
+googleindex = 0
+appointment_times = []
 print('Begin endless loop')
 while True:
     try:
@@ -263,7 +263,6 @@ while True:
         dayname = whatday(int(now[6]))
         clockin = float(schedule[dayname][0]['clockin'])
         clockout = float(schedule[dayname][0]['clockout'])
-        appointment_times = []
         if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
             try:
                 appointment_times = sorted(appointment_times)
@@ -271,12 +270,14 @@ while True:
                 clockout = timetohour(appointment_times[-1])
                 eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
             except:
-                appointent_times = []
+                print('Scheduling issues')
+                appointment_times = []
                 clockin = 0
                 clockout = 0
                 eventbool = False               
         working = atwork(clockin, clockout, hoursin)
         if working is True:
+            print('Pour yourself a cup of ambition')
             # Draw the events
             addevents(np, appointment_times)
             # Draw the bar
