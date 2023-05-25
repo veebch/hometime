@@ -44,9 +44,7 @@ def get_today_appointment_times(calendar_id, api_key, tz):
     url = f"https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events"
     url += f"?timeMin={date}T00:00:00Z&timeMax={date}T23:59:59Z&timeZone={tz}&key={api_key}"
 
-
     # Send the request
-    print(url)
     response = urequests.get(url)
     data = response.json()
     # Extract the appointment times
@@ -87,7 +85,6 @@ def set_time(worldtimeurl):
         minute = int(datetime_str[14:16])
         second = int(datetime_str[17:19])
         offset = int(parsed["currentUtcOffset"]["seconds"])/3600
-        print(offset)
         # update internal RTC
         machine.RTC().datetime((year,
                       month,
@@ -141,7 +138,7 @@ def addevents(np,response):
                     np[i] = eventcollist[index % len(eventcollist)]
             index = (index + 1) 
     except:
-        print('done')
+        pass
         
     
 
@@ -261,18 +258,16 @@ while True:
         now = time.gmtime()
         hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
         if (googlecalbool is True) & (googleindex == 1):
+            print('Updating Calendar')
             appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
-            time.sleep(1)
-            print('getgoogle')
-        if googlecalbool is True:
+        dayname = whatday(int(now[6]))
+        clockin = float(schedule[dayname][0]['clockin'])
+        clockout = float(schedule[dayname][0]['clockout'])
+        if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
             appointment_times = sorted(appointment_times)
             clockin = timetohour(appointment_times[0])
             clockout = timetohour(appointment_times[-1])
             addevents(np, appointment_times)
-        else:
-            dayname = whatday(int(now[6]))
-            clockin = float(schedule[dayname][0]['clockin'])
-            clockout = float(schedule[dayname][0]['clockout'])
         eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
         working = atwork(clockin, clockout, hoursin)
         if working is True:
@@ -302,3 +297,5 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
+
+
