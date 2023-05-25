@@ -126,12 +126,10 @@ def timetohour(time_string):
 def addevents(np,response):
     indexes = []
     for x in response:
-        print('Event',x)
         hour = timetohour(x)
         index = hourtoindex(hour)
         if valid(index):
             indexes.append(index)
-    print(indexes)
     #pop out pairs of values and paint in meetings
     try:
         index = 0
@@ -202,6 +200,7 @@ def wheel(pos):
 
 
 def rainbow_cycle(np):
+    print ('Rainbow!')
     for j in range(255):
         for i in range(n):
             pixel_index = (i * 256 // n) + j
@@ -210,11 +209,8 @@ def rainbow_cycle(np):
 
 
 def atwork(clockin, clockout, time):
-    index = -1
-    if clockin != clockout:
-        index = hourtoindex(time)
     work = False
-    if index > -1:
+    if (time >= clockin) & (time <clockout):
         work = True
     return work
 
@@ -244,13 +240,13 @@ while wlan.isconnected() is not True:
     time.sleep(1)
     print("Waiting for WiFi")
 np = neopixel.NeoPixel(machine.Pin(p), n)
+rainbow_cycle(np)
 count = 1
 firstrun = True
 # When you plug in, update rather than wait until the stroke of the next minute
 print("Connected to WiFi")
 time.sleep(1)
 off(np)
-shonetoday = True
 led.off()
 dow, offset = set_time(worldtimeurl)
 print(time.localtime())
@@ -258,56 +254,46 @@ googleindex = 0
 print('Begin endless loop')
 while True:
     try:
+        # wipe led clean before adding stuff
         for i in range(n):
             np[i] = (0, 0, 0)
         googleindex = googleindex + 1
         now = time.gmtime()
-        dayname = whatday(int(now[6]))
         hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
         if (googlecalbool is True) & (googleindex == 1):
             appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
             time.sleep(1)
             print('getgoogle')
-        if (googleindex > checkgoogleevery):
-            googleindex = 0
         if googlecalbool is True:
             appointment_times = sorted(appointment_times)
             clockin = timetohour(appointment_times[0])
             clockout = timetohour(appointment_times[-1])
-            print('clockin',clockin)
-            print('clockout', clockout)
             addevents(np, appointment_times)
         else:
+            dayname = whatday(int(now[6]))
             clockin = float(schedule[dayname][0]['clockin'])
             clockout = float(schedule[dayname][0]['clockout'])
         eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
         working = atwork(clockin, clockout, hoursin)
         if working is True:
-            shonetoday = False
             # If not working, no lights will show
             # update lights at the stroke of every minute, or on first run
-            if firstrun:
-                # If this was the initial update, mark it as complete
-                firstrun = False
-            count = (count + 1) % 2
-            # The value used to toggle lights
             bar(np, hoursin)
             if  eventbool is True:
-                # If an event is starting, flash all LEDS otherwise just the end of the bar
+                # If an event is starting, breathe LEDs, otherwise just the end of the bar
                 breathe(np, 30)
             else:
+                count = (count + 1) % 2
+                # The value used to toggle lights
                 ledindex = min(hourtoindex(hoursin), n)
                 np[ledindex] = tuple(z*count for z in barcolor)
                 # Just the tip of the bar
             np.write()
-        else:
-            if shonetoday is False:
-                led.on()
-                rainbow_cycle(np)
-                shonetoday = True
-                off(np)
-        if now[5] == 0 and now[4] == 44 and now[3] == 4:
-            machine.reset()  # Reset at 4:44 because Jay Z, and to start afresh
+            if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout
+                machine.reset()
+        # reset the google check index if needed
+        if (googleindex > checkgoogleevery):
+            googleindex = 0
         time.sleep(1)
     except Exception as e:
         print(e)
@@ -316,5 +302,3 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
-
-
