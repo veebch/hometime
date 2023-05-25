@@ -10,7 +10,7 @@ BARCOL = (0,100,0)
 EVENTCOL =[(255, 255, 255),(255,255,0)] # list of tuples used as meeting colours
 FLIP = False                # Flip display (set to True if the strip runs from right to left)
 GOOGLECALBOOL = True        # Boolean for whether to check google calendar page
-SCHEDULE = {
+SCHEDULE = {                # This only gets used if you're NOT using google calendar
     "monday": [
       {
         "clockin": "9",

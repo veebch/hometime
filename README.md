@@ -11,11 +11,13 @@ A physical LED progress bar for the working day based on information from a publ
 - flashes when it's time for an event on the calendar, 
 - rewards you with a pretty rainbow at hometime.
 
-## Video
+## Videos
 
-Tap on the picture for a video of it being assembled and working as part of a home made whiteboard. Since the video was made, there have been some improvements to how meetings are displayed.
+Tap on the picture for a video of it being assembled and working as part of a home made whiteboard. Since the video was made, there have been some improvements to how meetings are displayed, that is shown in the second short video.
 
 [![Video](images/video.png)](https://www.youtube.com/watch?v=MDij1lKcI70)
+
+[![Mod demo](http://img.youtube.com/vi/boY1xJGBQk4/0.jpg)](http://www.youtube.com/watch?v=boY1xJGBQk4)
 
 ## How it works
 
