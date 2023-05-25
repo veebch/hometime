@@ -257,13 +257,13 @@ while True:
         googleindex = googleindex + 1
         now = time.gmtime()
         hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
-        if (googlecalbool is True) & (googleindex == 1):
-            print('Updating from Google Calendar')
-            appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
         dayname = whatday(int(now[6]))
         clockin = float(schedule[dayname][0]['clockin'])
         clockout = float(schedule[dayname][0]['clockout'])
         if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
+            if googleindex == 1:
+                print('Updating from Google Calendar')
+                appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
             try:
                 appointment_times = sorted(appointment_times)
                 clockin = timetohour(appointment_times[0])
