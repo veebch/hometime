@@ -239,7 +239,6 @@ while wlan.isconnected() is not True:
 np = neopixel.NeoPixel(machine.Pin(p), n)
 rainbow_cycle(np)
 count = 1
-firstrun = True
 # When you plug in, update rather than wait until the stroke of the next minute
 print("Connected to WiFi")
 time.sleep(1)
@@ -258,7 +257,7 @@ while True:
         now = time.gmtime()
         hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
         if (googlecalbool is True) & (googleindex == 1):
-            print('Updating Calendar')
+            print('Updating from Google Calendar')
             appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
         dayname = whatday(int(now[6]))
         clockin = float(schedule[dayname][0]['clockin'])
@@ -271,24 +270,24 @@ while True:
         eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
         working = atwork(clockin, clockout, hoursin)
         if working is True:
-            # If not working, no lights will show
-            # update lights at the stroke of every minute, or on first run
+            # Draw the bar
             bar(np, hoursin)
             if  eventbool is True:
-                # If an event is starting, breathe LEDs, otherwise just the end of the bar
+                # If an event is starting, breathe LEDs
                 breathe(np, 30)
             else:
+                # Toggle the end led of the bar
                 count = (count + 1) % 2
                 # The value used to toggle lights
                 ledindex = min(hourtoindex(hoursin), n)
                 np[ledindex] = tuple(z*count for z in barcolor)
                 # Just the tip of the bar
-            np.write()
-            if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout
+            if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
                 machine.reset()
         # reset the google check index if needed
         if (googleindex > checkgoogleevery):
             googleindex = 0
+        np.write()
         time.sleep(1)
     except Exception as e:
         print(e)
