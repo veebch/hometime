@@ -253,6 +253,7 @@ while True:
         # wipe led clean before adding stuff
         for i in range(n):
             np[i] = (0, 0, 0)
+        eventbool = False
         googleindex = googleindex + 1
         now = time.gmtime()
         hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
@@ -262,17 +263,25 @@ while True:
         dayname = whatday(int(now[6]))
         clockin = float(schedule[dayname][0]['clockin'])
         clockout = float(schedule[dayname][0]['clockout'])
+        appointment_times = []
         if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
-            appointment_times = sorted(appointment_times)
-            clockin = timetohour(appointment_times[0])
-            clockout = timetohour(appointment_times[-1])
-            addevents(np, appointment_times)
-        eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
+            try:
+                appointment_times = sorted(appointment_times)
+                clockin = timetohour(appointment_times[0])
+                clockout = timetohour(appointment_times[-1])
+                eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
+            except:
+                appointent_times = []
+                clockin = 0
+                clockout = 0
+                eventbool = False               
         working = atwork(clockin, clockout, hoursin)
         if working is True:
+            # Draw the events
+            addevents(np, appointment_times)
             # Draw the bar
             bar(np, hoursin)
-            if  eventbool is True:
+            if eventbool is True:
                 # If an event is starting, breathe LEDs
                 breathe(np, 30)
             else:
@@ -290,7 +299,7 @@ while True:
         np.write()
         time.sleep(1)
     except Exception as e:
-        print(e)
+        print('Exception:',e)
         off(np)
         time.sleep(1)
         machine.reset()
