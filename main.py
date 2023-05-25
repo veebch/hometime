@@ -252,7 +252,7 @@ while True:
     try:
         # wipe led clean before adding stuff
         for i in range(n):
-            np[i] = (0, 0, 0)
+            np[i]  = (0, 0, 0)
         eventbool = False
         googleindex = googleindex + 1
         now = time.gmtime()
