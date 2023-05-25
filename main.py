@@ -174,7 +174,7 @@ def eventnow(hoursin, response):
     event = False
     for x in response:
         hour = timetohour(x)
-        if hourtoindex(hour) == hourtoindex(hoursin):
+        if abs(hour - hoursin) < 30/3600:
             event = True
     return event
 
@@ -219,6 +219,24 @@ def atwork(clockin, clockout, time):
     return work
 
 
+def breathe(np, seconds):
+        n = 0
+        index = 0
+        sleeptime = .05
+        breathespeed = .1
+        cycles = seconds/sleeptime
+        while index < cycles:
+            val = int((255/2)*(1+math.sin(n)))
+            for j in range(144):
+                np[j]=(val, val , val)      # Set LED to a converted HSV value
+            np.write()
+            n = (n + breathespeed ) % 360
+            time.sleep(sleeptime)
+            index = index + 1
+            
+
+
+
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(config.SSID, config.PASSWORD)
@@ -236,8 +254,6 @@ shonetoday = True
 led.off()
 dow, offset = set_time(worldtimeurl)
 print(time.localtime())
-# appointment_times = get_today_appointment_times(calendar, api_key)
-# print(appointment_times)
 googleindex = 0 
 print('Begin endless loop')
 while True:
@@ -279,7 +295,7 @@ while True:
             if  eventbool is True:
                 # If an event is starting, flash all LEDS otherwise just the end of the bar
                 for i in range(n):
-                    np[i] = tuple(z*count for z in eventcollist[1])
+                    breathe(np, 30)
                     # All lights
             else:
                 ledindex = min(hourtoindex(hoursin), n)
@@ -302,5 +318,3 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
-
-
