@@ -294,9 +294,7 @@ while True:
             bar(np, hoursin)
             if  eventbool is True:
                 # If an event is starting, flash all LEDS otherwise just the end of the bar
-                for i in range(n):
-                    breathe(np, 30)
-                    # All lights
+                breathe(np, 30)
             else:
                 ledindex = min(hourtoindex(hoursin), n)
                 np[ledindex] = tuple(z*count for z in barcolor)
@@ -318,3 +316,5 @@ while True:
         machine.reset()
     except KeyboardInterrupt:
         off(np)
+
+
