@@ -110,8 +110,10 @@ def bar(np, upto):
 def timetohour(time_string):
 
     # Extract the time portion from the string
-    time_part = time_string.split("T")[1].split("+")[0]
-
+    if time_string.count('-') == 2:
+        time_part = time_string.split("T")[1].split("+")[0]
+    else:
+        time_part = time_string.split("T")[1].split("-")[0]
     # Split the time into hours, minutes, and seconds
     hours, minutes, seconds = time_part.split(":")
 
@@ -228,7 +230,11 @@ def breathe(np, seconds):
             index = index + 1
             
 
-
+def sorted_appointments(array):
+    # This is just a placeholder for when/if the google api sends garbled times
+    pass
+    return array
+    
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
@@ -252,7 +258,7 @@ while True:
     try:
         # wipe led clean before adding stuff
         for i in range(n):
-            np[i]  = (0, 0, 0)
+            np[i] = (0, 0, 0)
         eventbool = False
         googleindex = googleindex + 1
         now = time.gmtime()
@@ -265,9 +271,11 @@ while True:
                 print('Updating from Google Calendar')
                 appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
             try:
-                appointment_times = sorted(appointment_times)
+                appointment_times = sorted_appointments(appointment_times)
+                print(appointment_times)
                 clockin = timetohour(appointment_times[0])
-                clockout = timetohour(appointment_times[-1])
+                print("clockin")
+                clockout = timetohour(appointment_times[len(appointment_times)-1])
                 eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
             except:
                 print('Scheduling issues')
