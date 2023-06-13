@@ -232,7 +232,7 @@ def breathe(np, seconds):
 
 def sorted_appointments(array):
     # This is just a placeholder for when/if the google api sends garbled times
-    pass
+    array=sorted(array)
     return array
     
 
@@ -274,6 +274,7 @@ while True:
                 appointment_times = sorted_appointments(appointment_times)
                 print(appointment_times)
                 clockin = timetohour(appointment_times[0])
+                print("clockin:",clockin)
                 clockout = timetohour(appointment_times[len(appointment_times)-1])
                 eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
             except:
