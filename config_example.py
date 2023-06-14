@@ -1,5 +1,3 @@
-SSID = "wifissid"
-PASSWORD = "trustnoone"
 CALENDAR = "INSERT YOUR CALENDAR NAME"
 APIKEY = "INSERT YOUR APIKEY"
 TIMEZONE = "Europe/Zurich"
