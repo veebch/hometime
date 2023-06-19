@@ -3,6 +3,8 @@
 #  PoC, fork and make it better
 #  GPL 3
 #
+from phew import access_point, connect_to_wifi, is_connected_to_wifi, dns, server
+from phew.template import render_template
 import machine
 import time
 import network
@@ -10,6 +12,9 @@ import config
 import urequests
 import neopixel
 import math
+import os
+import json
+
 
 # Time with daylight savings time and time zone factored in, edit this to fit where you are
 worldtimeurl = "https://timeapi.io/api/TimeZone/zone?timezone=" + config.TIMEZONE
@@ -30,6 +35,10 @@ led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
 checkgoogleevery = 10
+AP_NAME = "pi pico"
+AP_DOMAIN = "pipico.net"
+AP_TEMPLATE_PATH = "ap_templates"
+WIFI_FILE = "wifi.json"
 
 
 def get_today_appointment_times(calendar_id, api_key, tz):
@@ -98,8 +107,8 @@ def set_time(worldtimeurl):
         return dow,offset
 
 
-def bar(np, upto):
-    barupto = hourtoindex(upto)
+def bar(np, upto, clockin, clockout):
+    barupto = hourtoindex(upto, clockin, clockout)
     for i in range(barupto):
         if flip is True:
             np[n-i] = barcolor
@@ -122,11 +131,11 @@ def timetohour(time_string):
     return parsed_time
 
 
-def addevents(np,response):
+def addevents(np, response, clockin, clockout):
     indexes = []
     for x in response:
         hour = timetohour(x)
-        index = hourtoindex(hour)
+        index = hourtoindex(hour, clockin, clockout)
         if valid(index):
             indexes.append(index)
     #pop out pairs of values and paint in meetings
@@ -158,7 +167,7 @@ def off(np):
         np.write()
 
 
-def hourtoindex(hoursin):
+def hourtoindex(hoursin, clockin, clockout):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if flip is True:
         index = n - 1 - index
@@ -236,83 +245,139 @@ def sorted_appointments(array):
     return array
     
 
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(config.SSID, config.PASSWORD)
-while wlan.isconnected() is not True:
+def application_mode():
+    global clockin, clockout
+    print("Entering application mode.")
+    np = neopixel.NeoPixel(machine.Pin(p), n)
+    rainbow_cycle(np)
+    count = 1
+    # When you plug in, update rather than wait until the stroke of the next minute
+    print("Connected to WiFi")
     time.sleep(1)
-    print("Waiting for WiFi")
-np = neopixel.NeoPixel(machine.Pin(p), n)
-rainbow_cycle(np)
-count = 1
-# When you plug in, update rather than wait until the stroke of the next minute
-print("Connected to WiFi")
-time.sleep(1)
-off(np)
-led.off()
-dow, offset = set_time(worldtimeurl)
-googleindex = 0
-appointment_times = []
-print('Begin endless loop')
-while True:
-    try:
-        # wipe led clean before adding stuff
-        for i in range(n):
-            np[i] = (0, 0, 0)
-        eventbool = False
-        googleindex = googleindex + 1
-        now = time.gmtime()
-        hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
-        dayname = whatday(int(now[6]))
-        clockin = float(schedule[dayname][0]['clockin'])
-        clockout = float(schedule[dayname][0]['clockout'])
-        if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
-            if googleindex == 1:
-                print('Updating from Google Calendar')
-                appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
-            try:
-                appointment_times = sorted_appointments(appointment_times)
-                print(appointment_times)
-                clockin = timetohour(appointment_times[0])
-                print("clockin:",clockin)
-                clockout = timetohour(appointment_times[len(appointment_times)-1])
-                eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
-            except:
-                print('Scheduling issues')
-                appointment_times = []
-                clockin = 0
-                clockout = 0
-                eventbool = False               
-        working = atwork(clockin, clockout, hoursin)
-        if working is True:
-            print('Pour yourself a cup of ambition')
-            # Draw the events
-            addevents(np, appointment_times)
-            # Draw the bar
-            bar(np, hoursin)
-            if eventbool is True:
-                # If an event is starting, breathe LEDs
-                breathe(np, 30)
-            else:
-                # Toggle the end led of the bar
-                count = (count + 1) % 2
-                # The value used to toggle lights
-                ledindex = min(hourtoindex(hoursin), n)
-                np[ledindex] = tuple(z*count for z in barcolor)
-                # Just the tip of the bar
-            if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
-                machine.reset()
-        # reset the google check index if needed
-        if (googleindex > checkgoogleevery):
-            googleindex = 0
-        np.write()
-        time.sleep(1)
-    except Exception as e:
-        print('Exception:',e)
-        off(np)
-        time.sleep(1)
-        machine.reset()
-    except KeyboardInterrupt:
-        off(np)
+    off(np)
+    led.off()
+    dow, offset = set_time(worldtimeurl)
+    googleindex = 0
+    appointment_times = []
+    print('Begin endless loop')
+    while True:
+        try:
+            # wipe led clean before adding stuff
+            for i in range(n):
+                np[i] = (0, 0, 0)
+            eventbool = False
+            googleindex = googleindex + 1
+            now = time.gmtime()
+            hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
+            dayname = whatday(int(now[6]))
+            clockin = float(schedule[dayname][0]['clockin'])
+            clockout = float(schedule[dayname][0]['clockout'])
+            if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
+                if googleindex == 1:
+                    print('Updating from Google Calendar')
+                    appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
+                try:
+                    appointment_times = sorted_appointments(appointment_times)
+                    print(appointment_times)
+                    clockin = timetohour(appointment_times[0])
+                    print("clockin:",clockin)
+                    clockout = timetohour(appointment_times[len(appointment_times)-1])
+                    eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
+                except:
+                    print('Scheduling issues')
+                    appointment_times = []
+                    clockin = 0
+                    clockout = 0
+                    eventbool = False
+            working = atwork(clockin, clockout, hoursin)
+            if working is True:
+                print('Pour yourself a cup of ambition')
+                # Draw the events
+                addevents(np, appointment_times, clockin, clockout)
+                # Draw the bar
+                bar(np, hoursin, clockin, clockout)
+                if eventbool is True:
+                    # If an event is starting, breathe LEDs
+                    breathe(np, 30)
+                else:
+                    # Toggle the end led of the bar
+                    count = (count + 1) % 2
+                    # The value used to toggle lights
+                    ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
+                    np[ledindex] = tuple(z*count for z in barcolor)
+                    # Just the tip of the bar
+                if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
+                    machine.reset()
+            # reset the google check index if needed
+            if (googleindex > checkgoogleevery):
+                googleindex = 0
+            np.write()
+            time.sleep(1)
+        except Exception as e:
+            print('Exception:',e)
+            off(np)
+            time.sleep(1)
+            machine.reset()
+        except KeyboardInterrupt:
+            off(np)
 
 
+def setup_mode():
+    print("Entering setup mode...")
+
+    def ap_index(request):
+        if request.headers.get("host") != AP_DOMAIN:
+            return render_template(f"{AP_TEMPLATE_PATH}/redirect.html", domain=AP_DOMAIN)
+
+        return render_template(f"{AP_TEMPLATE_PATH}/index.html")
+
+    def ap_configure(request):
+        print("Saving wifi credentials...")
+
+        with open(WIFI_FILE, "w") as f:
+            json.dump(request.form, f)
+            f.close()
+
+        # Reboot from new thread after we have responded to the user.
+        _thread.start_new_thread(machine_reset, ())
+        return render_template(f"{AP_TEMPLATE_PATH}/configured.html", ssid=request.form["ssid"])
+
+    def ap_catch_all(request):
+        if request.headers.get("host") != AP_DOMAIN:
+            return render_template(f"{AP_TEMPLATE_PATH}/redirect.html", domain=AP_DOMAIN)
+
+        return "Not found.", 404
+
+    server.add_route("/", handler=ap_index, methods=["GET"])
+    server.add_route("/configure", handler=ap_configure, methods=["POST"])
+    server.set_callback(ap_catch_all)
+
+    ap = access_point(AP_NAME)
+    ip = ap.ifconfig()[0]
+    dns.run_catchall(ip)
+    server.run()
+
+# Figure out which mode to start up in...
+try:
+    os.stat(WIFI_FILE)
+
+    # File was found, attempt to connect to wifi...
+    with open(WIFI_FILE) as f:
+        wifi_credentials = json.load(f)
+        ip_address = connect_to_wifi(wifi_credentials["ssid"], wifi_credentials["password"])
+
+        if not is_connected_to_wifi():
+            # Bad configuration, delete the credentials file, reboot
+            # into setup mode to get new credentials from the user.
+            print("Bad wifi connection!")
+            print(wifi_credentials)
+            os.remove(WIFI_FILE)
+            machine_reset()
+
+        print(f"Connected to wifi, IP address {ip_address}")
+        application_mode()
+
+except Exception:
+    # Either no wifi configuration file found, or something went wrong,
+    # so go into setup mode.
+    setup_mode()
