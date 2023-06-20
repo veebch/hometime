@@ -359,6 +359,8 @@ def setup_mode():
     dns.run_catchall(ip)
     server.run()
 
+# Main Logic
+
 # Figure out which mode to start up in...
 try:
     os.stat(WIFI_FILE)
@@ -377,7 +379,7 @@ try:
             machine_reset()
 
         print(f"Connected to wifi, IP address {ip_address}")
-        application_mode()
+        application_mode()  # Contains all the progress bar code
 
 except Exception:
     # Either no wifi configuration file found, or something went wrong,
