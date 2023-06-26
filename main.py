@@ -275,21 +275,21 @@ def application_mode():
             clockout = float(schedule[dayname][0]['clockout'])
             if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
                 if googleindex == 1:
-                    print('Updating from Google Calendar')
-                    appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
-                try:
-                    appointment_times = sorted_appointments(appointment_times)
-                    print(appointment_times)
-                    clockin = timetohour(appointment_times[0])
-                    print("clockin:",clockin)
-                    clockout = timetohour(appointment_times[len(appointment_times)-1])
-                    eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
-                except:
-                    print('Scheduling issues')
-                    appointment_times = []
-                    clockin = 0
-                    clockout = 0
-                    eventbool = False
+                    try:
+                        print('Updating from Google Calendar')
+                        appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
+                        appointment_times = sorted_appointments(appointment_times)
+                        print(appointment_times)
+                        clockin = timetohour(appointment_times[0])
+                        print("clockin:",clockin)
+                        clockout = timetohour(appointment_times[len(appointment_times)-1])
+                        eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
+                    except:
+                        print('Scheduling issues')
+                        appointment_times = []
+                        clockin = 0
+                        clockout = 0
+                        eventbool = False
             working = atwork(clockin, clockout, hoursin)
             if working is True:
                 print('Pour yourself a cup of ambition')
