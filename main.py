@@ -6,6 +6,8 @@
 from phew import access_point, connect_to_wifi, is_connected_to_wifi, dns, server
 from phew.template import render_template
 import machine
+import _thread
+import utime
 import time
 import network
 import config
@@ -40,6 +42,11 @@ AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
 WIFI_FILE = "wifi.json"
 
+
+def machine_reset():
+    utime.sleep(1)
+    print("Resetting...")
+    machine.reset()
 
 def get_today_appointment_times(calendar_id, api_key, tz):
     # Get the date from the RTC
