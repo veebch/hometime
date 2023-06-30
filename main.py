@@ -247,6 +247,7 @@ def breathe(np, seconds):
             n = (n + breathespeed ) % 360
             time.sleep(sleeptime)
             index = index + 1
+            wdt.feed()
             
 
 def sorted_appointments(array):
