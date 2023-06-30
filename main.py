@@ -272,72 +272,71 @@ def application_mode():
     print('Begin endless loop')
     wdt = machine.WDT(timeout=8000)  # enable watchdog timer with a timeout of 8s
     while True:
-while True:
-    try:
-        # wipe led clean before adding stuff
-        for i in range(n):
-            np[i] = (0, 0, 0)
-        eventbool = False
-        googleindex = googleindex + 1
-        now = time.gmtime()
-        hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
-        dayname = whatday(int(now[6]))
-        if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
-            if googleindex == 1:
-                print('Updating from Google Calendar')
-                try:
-                    appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
-                    appointment_times = sorted_appointments(appointment_times)
-                    print(appointment_times)
-                    clockin = timetohour(appointment_times[0])
-                    print("clockin:",clockin)
-                    clockout = timetohour(appointment_times[len(appointment_times)-1])
-                    eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
-                except:
-                    print('Scheduling issues')
-                    appointment_times = []
-                    clockin = 0
-                    clockout = 0
-                    eventbool = False
-        else:
-                    clockin = float(schedule[dayname][0]['clockin'])
-                    clockout = float(schedule[dayname][0]['clockout'])
-        working = atwork(clockin, clockout, hoursin)
-        print(working, clockin, clockout, hoursin)
-        if working is True:
-            print('Pour yourself a cup of ambition')
-            # Draw the events
-            addevents(np, appointment_times)
-            # Draw the bar
-            bar(np, hoursin)
-            if eventbool is True:
-                # If an event is starting, breathe LEDs
-                breathe(np, 30)
+        try:
+            # wipe led clean before adding stuff
+            for i in range(n):
+                np[i] = (0, 0, 0)
+            eventbool = False
+            googleindex = googleindex + 1
+            now = time.gmtime()
+            hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
+            dayname = whatday(int(now[6]))
+            if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
+                if googleindex == 1:
+                    print('Updating from Google Calendar')
+                    try:
+                        appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
+                        appointment_times = sorted_appointments(appointment_times)
+                        print(appointment_times)
+                        clockin = timetohour(appointment_times[0])
+                        print("clockin:",clockin)
+                        clockout = timetohour(appointment_times[len(appointment_times)-1])
+                        eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
+                    except:
+                        print('Scheduling issues')
+                        appointment_times = []
+                        clockin = 0
+                        clockout = 0
+                        eventbool = False
             else:
-                # Toggle the end led of the bar
-                count = (count + 1) % 2
-                # The value used to toggle lights
-                ledindex = min(hourtoindex(hoursin), n)
-                np[ledindex] = tuple(z*count for z in barcolor)
-                # Just the tip of the bar
-            if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
-                machine.reset()
-            if flip == True:
-                np = flipit(np,n)
-                print('Flipped')
-        # reset the google check index if needed
-        if (googleindex > checkgoogleevery):
-            googleindex = 0
-        np.write()
-        wdt.feed()
-        time.sleep(1)
-        except Exception as e:
-            print('Exception:',e)
-            off(np)
+                clockin = float(schedule[dayname][0]['clockin'])
+                clockout = float(schedule[dayname][0]['clockout'])
+            working = atwork(clockin, clockout, hoursin)
+            print(working, clockin, clockout, hoursin)
+            if working is True:
+                print('Pour yourself a cup of ambition')
+                # Draw the events
+                addevents(np, appointment_times)
+                # Draw the bar
+                bar(np, hoursin)
+                if eventbool is True:
+                    # If an event is starting, breathe LEDs
+                    breathe(np, 30)
+                else:
+                    # Toggle the end led of the bar
+                    count = (count + 1) % 2
+                    # The value used to toggle lights
+                    ledindex = min(hourtoindex(hoursin), n)
+                    np[ledindex] = tuple(z*count for z in barcolor)
+                    # Just the tip of the bar
+                if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
+                    machine.reset()
+                if flip == True:
+                    np = flipit(np,n)
+                    print('Flipped')
+            # reset the google check index if needed
+            if (googleindex > checkgoogleevery):
+                googleindex = 0
+            np.write()
+            wdt.feed()
             time.sleep(1)
-            machine.reset()
-        except KeyboardInterrupt:
-            off(np)
+            except Exception as e:
+                print('Exception:',e)
+                off(np)
+                time.sleep(1)
+                machine.reset()
+            except KeyboardInterrupt:
+                off(np)
 
 
 def setup_mode():
