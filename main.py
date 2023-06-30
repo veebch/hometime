@@ -325,10 +325,10 @@ while True:
             if flip == True:
                 np = flipit(np,n)
                 print('Flipped')
-            np.write()
         # reset the google check index if needed
         if (googleindex > checkgoogleevery):
             googleindex = 0
+        np.write()
         wdt.feed()
         time.sleep(1)
         except Exception as e:
