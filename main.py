@@ -114,8 +114,8 @@ def set_time(worldtimeurl):
         return dow,offset
     
 
-def bar(np, upto):
-    barupto = hourtoindex(upto)
+def bar(np, upto, clockin, clockout):
+    barupto = hourtoindex(upto, clockin, clockout)
     for i in range(barupto):
         np[i] = barcolor
         
@@ -179,7 +179,7 @@ def off(np):
         np[i] = (0, 0, 0)
         np.write()
 
-def hourtoindex(hoursin,clockin,clockout):
+def(hoursin,clockin,clockout):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if index < 0 or index > n:
         index = -1
@@ -308,7 +308,7 @@ def application_mode():
                 # Draw the events
                 addevents(np, appointment_times)
                 # Draw the bar
-                bar(np, hoursin)
+                bar(np, hoursin, clockin, clockout)
                 if eventbool is True:
                     # If an event is starting, breathe LEDs
                     breathe(np, 30)
@@ -316,7 +316,7 @@ def application_mode():
                     # Toggle the end led of the bar
                     count = (count + 1) % 2
                     # The value used to toggle lights
-                    ledindex = min(hourtoindex(hoursin), n)
+                    ledindex = min(hourtoindex(hoursin,clockin,clockout), n)
                     np[ledindex] = tuple(z*count for z in barcolor)
                     # Just the tip of the bar
                 if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
