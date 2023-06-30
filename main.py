@@ -179,7 +179,7 @@ def off(np):
         np[i] = (0, 0, 0)
         np.write()
 
-def(hoursin,clockin,clockout):
+def hourtoindex(hoursin, clockin, clockout):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if index < 0 or index > n:
         index = -1
@@ -306,7 +306,7 @@ def application_mode():
             if working is True:
                 print('Pour yourself a cup of ambition')
                 # Draw the events
-                addevents(np, appointment_times)
+                addevents(np, appointment_times, clockin, clockout)
                 # Draw the bar
                 bar(np, hoursin, clockin, clockout)
                 if eventbool is True:
@@ -316,7 +316,7 @@ def application_mode():
                     # Toggle the end led of the bar
                     count = (count + 1) % 2
                     # The value used to toggle lights
-                    ledindex = min(hourtoindex(hoursin,clockin,clockout), n)
+                    ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
                     np[ledindex] = tuple(z*count for z in barcolor)
                     # Just the tip of the bar
                 if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
