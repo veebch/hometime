@@ -223,6 +223,7 @@ def rainbow_cycle(np):
         for i in range(n):
             pixel_index = (i * 256 // n) + j
             np[i] = wheel(pixel_index & 255)
+            wdt.feed()
         np.write()
 
 
@@ -259,11 +260,12 @@ def sorted_appointments(array):
 def application_mode():
     global clockin, clockout
     print("Entering application mode.")
-    np = neopixel.NeoPixel(machine.Pin(p), n)
-    rainbow_cycle(np)
     count = 1
     # When you plug in, update rather than wait until the stroke of the next minute
     print("Connected to WiFi")
+    wdt = machine.WDT(timeout=8388)  # enable watchdog timer with a timeout of 8s
+    np = neopixel.NeoPixel(machine.Pin(p), n)
+    rainbow_cycle(np)
     time.sleep(1)
     off(np)
     led.off()
@@ -271,7 +273,6 @@ def application_mode():
     googleindex = 0
     appointment_times = []
     print('Begin endless loop')
-    wdt = machine.WDT(timeout=8388)  # enable watchdog timer with a timeout of 8s
     while True:
         try:
             # wipe led clean before adding stuff
