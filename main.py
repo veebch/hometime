@@ -270,7 +270,7 @@ def application_mode():
     googleindex = 0
     appointment_times = []
     print('Begin endless loop')
-    wdt = machine.WDT(timeout=8000)  # enable watchdog timer with a timeout of 8s
+    wdt = machine.WDT(timeout=8388)  # enable watchdog timer with a timeout of 8s
     while True:
         try:
             # wipe led clean before adding stuff
@@ -330,6 +330,7 @@ def application_mode():
             np.write()
             wdt.feed()
             time.sleep(1)
+            wdt.feed()
         except Exception as e:
             print('Exception:',e)
             off(np)
