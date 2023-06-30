@@ -330,13 +330,13 @@ def application_mode():
             np.write()
             wdt.feed()
             time.sleep(1)
-            except Exception as e:
-                print('Exception:',e)
-                off(np)
-                time.sleep(1)
-                machine.reset()
-            except KeyboardInterrupt:
-                off(np)
+        except Exception as e:
+            print('Exception:',e)
+            off(np)
+            time.sleep(1)
+            machine.reset()
+        except KeyboardInterrupt:
+            off(np)
 
 
 def setup_mode():
