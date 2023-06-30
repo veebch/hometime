@@ -112,15 +112,21 @@ def set_time(worldtimeurl):
                       0))
         dow = time.localtime()[6]
         return dow,offset
+    
 
-
-def bar(np, upto, clockin, clockout):
-    barupto = hourtoindex(upto, clockin, clockout)
+def bar(np, upto):
+    barupto = hourtoindex(upto)
     for i in range(barupto):
-        if flip is True:
-            np[n-i] = barcolor
-        else:
-            np[i] = barcolor
+        np[i] = barcolor
+        
+
+def flipit(np,n):
+    temp=[0]*n
+    for i in range(n):
+        temp[i]=np[i]
+    for i in range(n):
+        np[i]=temp[n-1-i]
+    return np
 
 
 def timetohour(time_string):
@@ -173,11 +179,8 @@ def off(np):
         np[i] = (0, 0, 0)
         np.write()
 
-
-def hourtoindex(hoursin, clockin, clockout):
+def hourtoindex(hoursin):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
-    if flip is True:
-        index = n - 1 - index
     if index < 0 or index > n:
         index = -1
     return index
@@ -319,10 +322,13 @@ while True:
                 # Just the tip of the bar
             if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
                 machine.reset()
+            if flip == True:
+                np = flipit(np,n)
+                print('Flipped')
+            np.write()
         # reset the google check index if needed
         if (googleindex > checkgoogleevery):
             googleindex = 0
-        np.write()
         wdt.feed()
         time.sleep(1)
         except Exception as e:
