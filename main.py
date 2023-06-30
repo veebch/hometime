@@ -179,7 +179,7 @@ def off(np):
         np[i] = (0, 0, 0)
         np.write()
 
-def hourtoindex(hoursin):
+def hourtoindex(hoursin,clockin,clockout):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if index < 0 or index > n:
         index = -1
