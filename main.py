@@ -223,7 +223,6 @@ def rainbow_cycle(np):
         for i in range(n):
             pixel_index = (i * 256 // n) + j
             np[i] = wheel(pixel_index & 255)
-            wdt.feed()
         np.write()
 
 
@@ -248,7 +247,7 @@ def breathe(np, seconds):
             n = (n + breathespeed ) % 360
             time.sleep(sleeptime)
             index = index + 1
-            wdt.feed()
+
             
 
 def sorted_appointments(array):
@@ -263,7 +262,6 @@ def application_mode():
     count = 1
     # When you plug in, update rather than wait until the stroke of the next minute
     print("Connected to WiFi")
-    wdt = machine.WDT(timeout=8388)  # enable watchdog timer with a timeout of 8s
     np = neopixel.NeoPixel(machine.Pin(p), n)
     rainbow_cycle(np)
     time.sleep(1)
@@ -330,9 +328,7 @@ def application_mode():
             if (googleindex > checkgoogleevery):
                 googleindex = 0
             np.write()
-            wdt.feed()
             time.sleep(1)
-            wdt.feed()
         except Exception as e:
             print('Exception:',e)
             off(np)
