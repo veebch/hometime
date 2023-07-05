@@ -76,4 +76,4 @@ On the first run, the pico will realise that it has no valid WiFi credentials an
 
 ## Configuration
 
-Parameters are in `config.py`. If you do not want to use Google Calendar, you can set the calendar use to **False** and rely on hardcoded clock in/out times.
+Parameters are in `config.py`. If you do not want to use Google Calendar, you can set the calendar useage to **False** and rely on hardcoded clock in/out times.
