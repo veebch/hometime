@@ -54,7 +54,17 @@ git clone https://github.com/veebch/hometime.git
 cd hometime
 mv config_example.py config.py
 ```
-Edit config.py to contain your WiFi credentials and other parameters. If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
+Edit config.py to contain some parameters:
+
+* Set your timezone "TIMEZONE". The default is "Europe/Zurich"; choose one from this list.
+* Choose the number of LED pixels "PIXELS". Note: if you have the default one-meter LED strip, leave the default as 144.
+* Set the "GPIOPIN" for controlling the LED strip. 
+* You can also set RGB values for the bar "BARCOL", and events "EVENTCOL".
+* If you need the strip to display from right to left, set "FLIP" to True.
+* In the "SCHEDULE" config dictionary, change (if you like) the 'clocking' and 'clockout' values for each day.
+* 
+With the configuration set up, you're ready to breathe life into your visual workday schedule.
+If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
 
 Check the port of the pico with the port listing command:
 ```
@@ -65,6 +75,8 @@ Now, using the port path (in our case `/dev/ttyACM0`) copy the contents to the r
 ```
 ampy -p /dev/ttyACM0 put main.py 
 ampy -p /dev/ttyACM0 put config.py
+ampy -p /dev/ttyACM0 put phew
+ampy -p /dev/ttyACM0 put ap_templates
 ```
 (*NB. make sure you are using the right port name, as shown in the port listing command above*)
 
