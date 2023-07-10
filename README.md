@@ -21,7 +21,7 @@ Tap on the picture for a video of it being assembled and working as part of a ho
 
 ## Tutorial
 
-There's a pretty comprehensive start-to-finish walkthrough by Dan Ionescu [here](https://medium.com/@ionescu.dan84?](https://medium.com/@ionescu.dan84/workday-progressbar-with-google-calendar-integration-b266aabd32a8)
+There's a pretty comprehensive start-to-finish walkthrough by Dan Ionescu [here](https://medium.com/@ionescu.dan84/workday-progressbar-with-google-calendar-integration-b266aabd32a8)
 
 ## How it works
 
