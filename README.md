@@ -19,6 +19,10 @@ Tap on the picture for a video of it being assembled and working as part of a ho
 
 [![Mod demo](http://img.youtube.com/vi/boY1xJGBQk4/0.jpg)](http://www.youtube.com/watch?v=boY1xJGBQk4)
 
+## Tutorial
+
+There's a pretty comprehensive start-to-finish walkthrough by Dan Ionescu [here]([https://medium.com/@ionescu.dan84?](https://medium.com/@ionescu.dan84/workday-progressbar-with-google-calendar-integration-b266aabd32a8))
+
 ## How it works
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from a [time api](https://timeapi.io), then shows you how far through the day you are.
