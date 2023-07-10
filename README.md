@@ -42,7 +42,8 @@ Attach the Light Strip to the Pico as described below:
 |   GND      | GND  |
 |   15      | DATA  |
 
-Schematic:
+### Schematic:
+
 ![Schematic](https://github.com/veebch/hometime/blob/main/images/schematic_fritzing.png)
 
 
@@ -60,13 +61,13 @@ mv config_example.py config.py
 ```
 Edit config.py to contain some parameters:
 
-* Set your timezone "TIMEZONE". The default is "Europe/Zurich"; choose one from this list.
+* Set your timezone "TIMEZONE". The default is "Europe/Zurich"; choose one from [this list](https://logic.edchen.org/linux-all-available-time-zones/).
 * Choose the number of LED pixels "PIXELS". Note: if you have the default one-meter LED strip, leave the default as 144.
 * Set the "GPIOPIN" for controlling the LED strip. 
 * You can also set RGB values for the bar "BARCOL", and events "EVENTCOL".
 * If you need the strip to display from right to left, set "FLIP" to True.
 * In the "SCHEDULE" config dictionary, change (if you like) the 'clocking' and 'clockout' values for each day.
-* 
+  
 With the configuration set up, you're ready to breathe life into your visual workday schedule.
 If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
 
