@@ -42,6 +42,10 @@ Attach the Light Strip to the Pico as described below:
 |   GND      | GND  |
 |   15      | DATA  |
 
+Schematic:
+![Schematic](https://github.com/veebch/hometime/blob/main/images/schematic_fritzing.png)
+
+
 ## Installing
 
 Download a `uf2` image and install it on the Pico W according to the [instructions](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html#drag-and-drop-micropython) on the Raspberry Pi website.
