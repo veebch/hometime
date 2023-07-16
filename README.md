@@ -94,7 +94,7 @@ Parameters are in `config.py`.
 * Set the "GPIOPIN" for controlling the LED strip (only change this if you're using different pins than the default). 
 * You can also set RGB values for the bar "BARCOL", and events "EVENTCOL".
 * If you need the strip to display from right to left, set "FLIP" to True.
-* In the "SCHEDULE" config dictionary, change (if you like) the 'clocking' and 'clockout' values for each day.
+* If you're not using Google Calendar, in the "SCHEDULE" config dictionary, change the 'clocking' and 'clockout' values for each day.
   
 With the configuration set up, you're ready to breathe life into your visual workday schedule.
 If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
