@@ -86,13 +86,12 @@ On the first run, the pico will realise that it has no valid WiFi credentials an
 
 ## Configuration
 
-Parameters are in `config.py`. If you do not want to use Google Calendar, you can set the calendar useage to **False** and rely on hardcoded clock in/out times.
+Parameters are in `config.py`.
 
-Edit config.py to contain some parameters:
-
+- If you do not want to use Google Calendar, you can set the calendar useage to **False** and rely on hardcoded clock in/out times.
 * Set your timezone "TIMEZONE". The default is "Europe/Zurich"; choose one from [this list](https://logic.edchen.org/linux-all-available-time-zones/).
 * Choose the number of LED pixels "PIXELS". Note: if you have the one-meter WS2812BLED strip mentioned above, leave the default as **144**.
-* Set the "GPIOPIN" for controlling the LED strip. 
+* Set the "GPIOPIN" for controlling the LED strip (only change this if you're using different pins than the default). 
 * You can also set RGB values for the bar "BARCOL", and events "EVENTCOL".
 * If you need the strip to display from right to left, set "FLIP" to True.
 * In the "SCHEDULE" config dictionary, change (if you like) the 'clocking' and 'clockout' values for each day.
