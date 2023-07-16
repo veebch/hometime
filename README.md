@@ -88,13 +88,14 @@ On the first run, the pico will realise that it has no valid WiFi credentials an
 
 Parameters are in `config.py`.
 
-- If you do not want to use Google Calendar, you can set the calendar useage to **False** and rely on hardcoded clock in/out times.
+* If you do not want to use Google Calendar, you can set the calendar useage to **False** and rely on hardcoded clock in/out times.
+* If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
 * Set your timezone "TIMEZONE". The default is "Europe/Zurich"; choose one from [this list](https://logic.edchen.org/linux-all-available-time-zones/).
 * Choose the number of LED pixels "PIXELS". Note: if you have the one-meter WS2812BLED strip mentioned above, leave the default as **144**.
 * Set the "GPIOPIN" for controlling the LED strip (only change this if you're using different pins than the default). 
 * You can also set RGB values for the bar "BARCOL", and events "EVENTCOL".
 * If you need the strip to display from right to left, set "FLIP" to True.
 * If you're not using Google Calendar, in the "SCHEDULE" config dictionary, change the 'clocking' and 'clockout' values for each day.
-  
-With the configuration set up, you're ready to breathe life into your visual workday schedule.
-If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
+
+That's it. Now whenever you plug it in to power, the code will autorun.
+
