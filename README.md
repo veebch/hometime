@@ -63,17 +63,6 @@ git clone https://github.com/veebch/hometime.git
 cd hometime
 mv config_example.py config.py
 ```
-Edit config.py to contain some parameters:
-
-* Set your timezone "TIMEZONE". The default is "Europe/Zurich"; choose one from [this list](https://logic.edchen.org/linux-all-available-time-zones/).
-* Choose the number of LED pixels "PIXELS". Note: if you have the one-meter WS2812BLED strip mentioned above, leave the default as **144**.
-* Set the "GPIOPIN" for controlling the LED strip. 
-* You can also set RGB values for the bar "BARCOL", and events "EVENTCOL".
-* If you need the strip to display from right to left, set "FLIP" to True.
-* In the "SCHEDULE" config dictionary, change (if you like) the 'clocking' and 'clockout' values for each day.
-  
-With the configuration set up, you're ready to breathe life into your visual workday schedule.
-If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
 
 Check the port of the pico with the port listing command:
 ```
@@ -98,3 +87,15 @@ On the first run, the pico will realise that it has no valid WiFi credentials an
 ## Configuration
 
 Parameters are in `config.py`. If you do not want to use Google Calendar, you can set the calendar useage to **False** and rely on hardcoded clock in/out times.
+
+Edit config.py to contain some parameters:
+
+* Set your timezone "TIMEZONE". The default is "Europe/Zurich"; choose one from [this list](https://logic.edchen.org/linux-all-available-time-zones/).
+* Choose the number of LED pixels "PIXELS". Note: if you have the one-meter WS2812BLED strip mentioned above, leave the default as **144**.
+* Set the "GPIOPIN" for controlling the LED strip. 
+* You can also set RGB values for the bar "BARCOL", and events "EVENTCOL".
+* If you need the strip to display from right to left, set "FLIP" to True.
+* In the "SCHEDULE" config dictionary, change (if you like) the 'clocking' and 'clockout' values for each day.
+  
+With the configuration set up, you're ready to breathe life into your visual workday schedule.
+If you are going to use the Google Calendar functionality, you'll need an [API key](https://support.google.com/googleapi/answer/6158862?hl=en) and a public Google Calendar address.
