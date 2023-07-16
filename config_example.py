@@ -9,7 +9,7 @@ EVENTCOL =[(255, 255, 255),(255,255,0)] # list of tuples used as meeting colours
 FLIP = False                # Flip display (set to True if the strip runs from right to left)
 GOOGLECALBOOL = True        # Boolean for whether to check google calendar page
 IGNORE_HARDCODED = False    # Set to True if you want Clock in at the start of first meeting and Clockout at end of last meeting
-SCHEDULE = {                # This only gets used if you're NOT using google calendar
+SCHEDULE = {                # This doesn't get used if IGNORE_HARDCODED is True. Othewise, it's the working hours for the week
     "monday": [
       {
         "clockin": "9",
