@@ -95,7 +95,7 @@ Parameters are in `config.py`.
 * Set the "**GPIOPIN**" for controlling the LED strip (only change this if you're using different pins than the default). 
 * You can also set RGB values for the progress bar "**BARCOL**", and events "**EVENTCOL**".
 * If you need the strip to display from right to left, set "**FLIP**" to **True**.
-* In the "SCHEDULE" config dictionary, change the 'clocking' and 'clockout' values for each day (or set **IGNORE_HARDCODED** to **True** if you'd like values derived from your calendar)
+* In the "SCHEDULE" config dictionary, change the 'clocking' and 'clockout' values for each day (or set **IGNORE_HARDCODED** to **True** if you'd like values derived from your calendar entries for the day)
 
 That's it. Now whenever you plug it in to power, the code will autorun.
 
