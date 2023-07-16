@@ -36,7 +36,7 @@ led.off()
 led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
-checkgoogleevery = 10
+checkevery = 10   # Number of cycles before refreshing schedule/clocking times
 AP_NAME = "pi pico"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
@@ -270,7 +270,7 @@ def application_mode():
     off(np)
     led.off()
     dow, offset = set_time(worldtimeurl)
-    googleindex = 0
+    checkindex = 0
     appointment_times = []
     print('Begin endless loop')
     while True:
@@ -279,30 +279,29 @@ def application_mode():
             for i in range(n):
                 np[i] = (0, 0, 0)
             eventbool = False
-            googleindex = googleindex + 1
+            checkindex = checkindex + 1
             now = time.gmtime()
             hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
             dayname = whatday(int(now[6]))
-            if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
-                if googleindex == 1:
+            if checkindex == 1:
+                clockin = float(schedule[dayname][0]['clockin'])
+                clockout = float(schedule[dayname][0]['clockout'])
+                if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
+                    appointment_times = []
+                    clockin = 0
+                    clockout = 0
+                    eventbool = False
                     print('Updating from Google Calendar')
                     try:
                         appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                         appointment_times = sorted_appointments(appointment_times)
                         print(appointment_times)
-                        clockin = timetohour(appointment_times[0])
-                        print("clockin:",clockin)
-                        clockout = timetohour(appointment_times[len(appointment_times)-1])
                         eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
+                        if config.IGNORE_HARDCODED is True:
+                            clockin = timetohour(appointment_times[0])
+                            clockout = timetohour(appointment_times[len(appointment_times)-1]) 
                     except:
                         print('Scheduling issues')
-                        appointment_times = []
-                        clockin = 0
-                        clockout = 0
-                        eventbool = False
-            else:
-                clockin = float(schedule[dayname][0]['clockin'])
-                clockout = float(schedule[dayname][0]['clockout'])
             working = atwork(clockin, clockout, hoursin)
             print(working, clockin, clockout, hoursin)
             if working is True:
@@ -327,8 +326,8 @@ def application_mode():
                     np = flipit(np,n)
                     print('Flipped')
             # reset the google check index if needed
-            if (googleindex > checkgoogleevery):
-                googleindex = 0
+            if (checkindex > checkevery):
+                checkindex = 0
             np.write()
             time.sleep(1)
         except Exception as e:
