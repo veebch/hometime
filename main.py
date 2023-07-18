@@ -1,8 +1,23 @@
-#
-#  Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
-#  PoC, fork and make it better
-#  GPL 3
-#
+"""
+    Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
+    PoC, fok and make it better
+    
+     Copyright (C) 2023 Veeb Projects https://veeb.ch
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>
+"""
+
 from phew import access_point, connect_to_wifi, is_connected_to_wifi, dns, server
 from phew.template import render_template
 import machine
