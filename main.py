@@ -251,17 +251,18 @@ def atwork(clockin, clockout, time):
 
 
 def breathe(np, seconds):
-        n = 0
+        nval = 0
+        n = np.n
         index = 0
         sleeptime = .05
         breathespeed = .1
         cycles = seconds/sleeptime
         while index < cycles:
-            val = int((255/2)*(1+math.sin(n)))
-            for j in range(144):
+            val = int((255/2)*(1+math.sin(nval)))
+            for j in range(n):
                 np[j]=(val, val , val)      # Set LED to a converted HSV value
             np.write()
-            n = (n + breathespeed ) % 360
+            nval = (nval + breathespeed ) % 360
             time.sleep(sleeptime)
             index = index + 1
 
