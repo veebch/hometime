@@ -31,7 +31,7 @@ import neopixel
 import math
 import os
 import json
-
+import re
 
 # Time with daylight savings time and time zone factored in, edit this to fit where you are
 worldtimeurl = "https://timeapi.io/api/TimeZone/zone?timezone=" + config.TIMEZONE
@@ -52,7 +52,7 @@ led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
 checkevery = 10   # Number of cycles before refreshing schedule/clocking times
-AP_NAME = "pi pico"
+AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
 WIFI_FILE = "wifi.json"
@@ -87,7 +87,6 @@ def get_today_appointment_times(calendar_id, api_key, tz):
          appointment_times.append(start)
          start = item["end"].get("dateTime", item["end"].get("date"))
          appointment_times.append(start)
-    print(appointment_times)
     return appointment_times
 
 
@@ -107,7 +106,11 @@ def whatday(weekday):
 
 def set_time(worldtimeurl):
         print('Grab time:',worldtimeurl)
-        response = urequests.get(worldtimeurl) 
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+        try:
+            response = urequests.get(worldtimeurl, headers=headers)
+        except:
+            print('Problem Getting Time')
         # parse JSON
         parsed = response.json()
         datetime_str = str(parsed["currentLocalTime"])
@@ -149,10 +152,10 @@ def flipit(np,n):
 def timetohour(time_string):
 
     # Extract the time portion from the string
-    if time_string.count('-') == 2:
-        time_part = time_string.split("T")[1].split("+")[0]
+    if time_string.count('-') == 0:
+        time_part = time_string.split("+")[0]
     else:
-        time_part = time_string.split("T")[1].split("-")[0]
+        time_part = time_string.split("-")[0]
     # Split the time into hours, minutes, and seconds
     hours, minutes, seconds = time_part.split(":")
 
@@ -270,7 +273,12 @@ def breathe(np, seconds):
 
 def sorted_appointments(array):
     # This is just a placeholder for when/if the google api sends garbled times
+    print('Appointment times:')
+    for x in range(len(array)):
+        array[x]=re.sub('.*T','',array[x])
     array=sorted(array)
+    for x in array:
+        print(x)
     return array
     
 
@@ -311,7 +319,6 @@ def application_mode():
                     try:
                         appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                         appointment_times = sorted_appointments(appointment_times)
-                        print(appointment_times)
                         eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                         if config.IGNORE_HARDCODED is True:
                             clockin = timetohour(appointment_times[0])
@@ -319,9 +326,8 @@ def application_mode():
                     except:
                         print('Scheduling issues')
             working = atwork(clockin, clockout, hoursin)
-            print(working, clockin, clockout, hoursin)
+            print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
             if working is True:
-                print('Pour yourself a cup of ambition')
                 # Draw the events
                 addevents(np, appointment_times, clockin, clockout)
                 # Draw the bar
@@ -340,7 +346,6 @@ def application_mode():
                     machine.reset()
                 if flip == True:
                     np = flipit(np,n)
-                    print('Flipped')
             # reset the google check index if needed
             if (checkindex > checkevery):
                 checkindex = 0
@@ -416,3 +421,4 @@ except Exception:
     # Either no wifi configuration file found, or something went wrong,
     # so go into setup mode.
     setup_mode()
+  
