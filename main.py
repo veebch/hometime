@@ -84,9 +84,11 @@ def get_today_appointment_times(calendar_id, api_key, tz):
          if item["status"] == "cancelled":
              continue
          start = item["start"].get("dateTime", item["start"].get("date"))
+         start = f"{date}{start[10:]}"
          appointment_times.append(start)
-         start = item["end"].get("dateTime", item["end"].get("date"))
-         appointment_times.append(start)
+         end = item["end"].get("dateTime", item["end"].get("date"))
+         end = f"{date}{end[10:]}"
+         appointment_times.append(end)  
     print(appointment_times)
     return appointment_times
 
