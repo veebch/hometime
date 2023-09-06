@@ -33,30 +33,30 @@ import os
 import json
 import re
 
-# Time with daylight savings time and time zone factored in, edit this to fit where you are
 worldtimeurl = "https://timeapi.io/api/TimeZone/zone?timezone=" + config.TIMEZONE
-# The ID of the public Google Calendar to be used
 calendar = config.CALENDAR
-# The API key for google... Not sure why it is needed, but it seems to be
 api_key = config.APIKEY
-n = config.PIXELS           # Number of pixels on strip
-p = config.GPIOPIN          # GPIO pin that data line of lights is connected to
-barcolor = config.BARCOL    # RGB for bar color
-eventcollist = config.EVENTCOL# RGB for event color
-schedule = config.SCHEDULE  # Working hours in config file (only used if google calendar not used)
+n = config.PIXELS
+p = config.GPIOPIN
+barcolor = config.BARCOL
+eventcollist = config.EVENTCOL
+tipanimation = config.TIPANI
+eventanimation = config.EVENTANI
+eventanidur = config.EVENTANIDURATION
+schedule = config.SCHEDULE
 flip = config.FLIP
 googlecalbool = config.GOOGLECALBOOL
+checkevery = config.GOOGLEREFRESH
 led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
-checkevery = 10   # Number of cycles before refreshing schedule/clocking times
-AP_NAME = "veebprojects"
-AP_DOMAIN = "pipico.net"
-AP_TEMPLATE_PATH = "ap_templates"
-WIFI_FILE = "wifi.json"
-
+AP_NAME = config.AP_NAME
+AP_DOMAIN = config.AP_DOMAIN
+AP_TEMPLATE_PATH = config.AP_TEMPLATE_PATH 
+WIFI_FILE = config.WIFI_FILE
+IGNORE_HARDCODED = config.IGNORE_HARDCODED
 
 def machine_reset():
     utime.sleep(1)
@@ -85,8 +85,8 @@ def get_today_appointment_times(calendar_id, api_key, tz):
              continue
          start = item["start"].get("dateTime", item["start"].get("date"))
          appointment_times.append(start)
-         start = item["end"].get("dateTime", item["end"].get("date"))
-         appointment_times.append(start)
+         end = item["end"].get("dateTime", item["end"].get("date"))
+         appointment_times.append(end)
     return appointment_times
 
 
@@ -105,7 +105,7 @@ def whatday(weekday):
 
 
 def set_time(worldtimeurl):
-        print('Grab time:',worldtimeurl)
+        print('Grab time: ', worldtimeurl)
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         try:
             response = urequests.get(worldtimeurl, headers=headers)
@@ -140,7 +140,7 @@ def bar(np, upto, clockin, clockout):
         np[i] = barcolor
         
 
-def flipit(np,n):
+def flipit(np, n):
     temp=[0]*n
     for i in range(n):
         temp[i]=np[i]
@@ -176,7 +176,7 @@ def addevents(np, response, clockin, clockout):
         index = 0
         while True:
             end = indexes.pop()
-            start= indexes.pop()
+            start = indexes.pop()
             for i in range(start,end):
                 if valid(i):
                     np[i] = eventcollist[index % len(eventcollist)]
@@ -200,7 +200,7 @@ def off(np):
         np.write()
 
 def hourtoindex(hoursin, clockin, clockout):
-    index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
+    index = int(math.floor(n*(hoursin-clockin)/(clockout-clockin)))
     if index < 0 or index > n:
         index = -1
     return index
@@ -252,7 +252,17 @@ def atwork(clockin, clockout, time):
         work = True
     return work
 
-
+def blink(np, seconds):
+    for j in range(seconds//2):
+        for i in range(n):
+            np[i] = eventcollist[0]
+        np.write()
+        time.sleep(1)
+        for i in range(n):
+            np[i] = (0, 0, 0)
+        np.write()
+        time.sleep(1)
+                    
 def breathe(np, seconds):
         nval = 0
         n = np.n
@@ -320,7 +330,7 @@ def application_mode():
                         appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                         appointment_times = sorted_appointments(appointment_times)
                         eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
-                        if config.IGNORE_HARDCODED is True:
+                        if IGNORE_HARDCODED is True:
                             clockin = timetohour(appointment_times[0])
                             clockout = timetohour(appointment_times[len(appointment_times)-1]) 
                     except:
@@ -328,20 +338,19 @@ def application_mode():
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
             if working is True:
-                # Draw the events
-                addevents(np, appointment_times, clockin, clockout)
                 # Draw the bar
                 bar(np, hoursin, clockin, clockout)
-                if eventbool is True:
-                    # If an event is starting, breathe LEDs
-                    breathe(np, 30)
-                else:
+                # Draw the events
+                addevents(np, appointment_times, clockin, clockout)
+                if eventbool is False:
                     # Toggle the end led of the bar
                     count = (count + 1) % 2
                     # The value used to toggle lights
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
                     np[ledindex] = tuple(z*count for z in barcolor)
                     # Just the tip of the bar
+                elif "Breathe" in eventanimation: breathe(np, eventanidur)
+                elif "Blink" in eventanimation: blink(np, eventanidur)    
                 if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
                     machine.reset()
                 if flip == True:
@@ -352,7 +361,7 @@ def application_mode():
             np.write()
             time.sleep(1)
         except Exception as e:
-            print('Exception:',e)
+            print('Exception: ', e)
             off(np)
             time.sleep(1)
             machine.reset()
@@ -421,4 +430,3 @@ except Exception:
     # Either no wifi configuration file found, or something went wrong,
     # so go into setup mode.
     setup_mode()
-  
