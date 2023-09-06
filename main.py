@@ -56,7 +56,7 @@ AP_NAME = config.AP_NAME
 AP_DOMAIN = config.AP_DOMAIN
 AP_TEMPLATE_PATH = config.AP_TEMPLATE_PATH 
 WIFI_FILE = config.WIFI_FILE
-
+IGNORE_HARDCODED = config.IGNORE_HARDCODED
 
 def machine_reset():
     utime.sleep(1)
@@ -252,7 +252,17 @@ def atwork(clockin, clockout, time):
         work = True
     return work
 
-
+def blink(np, seconds):
+    for j in range(seconds//2):
+        for i in range(n):
+            np[i] = eventcollist[0]
+        np.write()
+        time.sleep(1)
+        for i in range(n):
+            np[i] = (0, 0, 0)
+        np.write()
+        time.sleep(1)
+                    
 def breathe(np, seconds):
         nval = 0
         n = np.n
@@ -320,7 +330,7 @@ def application_mode():
                         appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                         appointment_times = sorted_appointments(appointment_times)
                         eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
-                        if config.IGNORE_HARDCODED is True:
+                        if IGNORE_HARDCODED is True:
                             clockin = timetohour(appointment_times[0])
                             clockout = timetohour(appointment_times[len(appointment_times)-1]) 
                     except:
@@ -332,16 +342,15 @@ def application_mode():
                 bar(np, hoursin, clockin, clockout)
                 # Draw the events
                 addevents(np, appointment_times, clockin, clockout)
-                if eventbool is True:
-                    # If an event is starting, breathe LEDs
-                    if "Breathe" in eventanimation: breathe(np, eventanidur)
-                else:
+                if eventbool is False:
                     # Toggle the end led of the bar
                     count = (count + 1) % 2
                     # The value used to toggle lights
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
                     np[ledindex] = tuple(z*count for z in barcolor)
                     # Just the tip of the bar
+                elif "Breathe" in eventanimation: breathe(np, eventanidur)
+                elif "Blink" in eventanimation: blink(np, eventanidur)    
                 if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
                     machine.reset()
                 if flip == True:
@@ -352,7 +361,7 @@ def application_mode():
             np.write()
             time.sleep(1)
         except Exception as e:
-            print('Exception:',e)
+            print('Exception: ', e)
             off(np)
             time.sleep(1)
             machine.reset()
