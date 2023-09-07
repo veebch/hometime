@@ -210,7 +210,7 @@ def eventnow(hoursin, response):
     event = False
     for x in response:
         hour = timetohour(x)
-        if abs(hour - hoursin) < 30/3600:
+        if abs(hour - hoursin) < 60/3600 # 60 seconds within start of event
             event = True
     return event
 
