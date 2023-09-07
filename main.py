@@ -343,7 +343,7 @@ def application_mode():
                 bar(np, hoursin, clockin, clockout)
                 # Draw the events
                 addevents(np, appointment_times, clockin, clockout)
-                if abs(hoursin - clockout) < 30/3600: # If we're within 30 seconds of clockout reset
+                if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
                     machine.reset()
                 if eventbool is False:
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
