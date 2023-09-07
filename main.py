@@ -52,6 +52,7 @@ led.off()
 led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
+dimcol = (barcolor[0]//4, barcolor[1]//4, barcolor[2]//4)
 AP_NAME = config.AP_NAME
 AP_DOMAIN = config.AP_DOMAIN
 AP_TEMPLATE_PATH = config.AP_TEMPLATE_PATH 
@@ -342,17 +343,20 @@ def application_mode():
                 bar(np, hoursin, clockin, clockout)
                 # Draw the events
                 addevents(np, appointment_times, clockin, clockout)
+                if abs(hoursin - clockout) < 30/3600: # If we're within 30 seconds of clockout reset
+                    machine.reset()
                 if eventbool is False:
-                    # Toggle the end led of the bar
-                    count = (count + 1) % 2
-                    # The value used to toggle lights
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
+                    # Toggle the end led of the bar
+                    if "Blink" in tipanimation:
+                        count = (count + 1) % 2
+                    elif "Dim" in tipanimation:
+                        np[ledindex+1] = dimcol
+                    # The value used to toggle lights
                     np[ledindex] = tuple(z*count for z in barcolor)
                     # Just the tip of the bar
                 elif "Breathe" in eventanimation: breathe(np, eventanidur)
                 elif "Blink" in eventanimation: blink(np, eventanidur)    
-                if abs(hoursin - clockout) < 10/3600: # If we're within 10 seconds of clockout reset
-                    machine.reset()
                 if flip == True:
                     np = flipit(np,n)
             # reset the google check index if needed
