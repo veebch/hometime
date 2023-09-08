@@ -251,7 +251,7 @@ def rainbow_cycle(np):
 
 def atwork(clockin, clockout, time):
     work = False
-    if (time >= clockin) & (time <clockout):
+    if (time >= clockin) & (time < clockout):
         work = True
     return work
 
@@ -348,13 +348,13 @@ def application_mode(np):
                         print('Scheduling issues')
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
+            if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
+                machine.reset()
             if working is True:
                 # Draw the bar
                 bar(np, hoursin, clockin, clockout)
                 # Draw the events
                 addevents(np, appointment_times, clockin, clockout)
-                if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
-                    machine.reset()
                 if eventbool is False:
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
                     # Toggle the end led of the bar
