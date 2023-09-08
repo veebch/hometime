@@ -25,7 +25,7 @@ import _thread
 import utime
 import time
 import network
-import config
+import config # type: ignore
 import urequests
 import neopixel
 import math
@@ -52,12 +52,14 @@ led.off()
 led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
+KeyboardExceptionCount = 0 # Initialising, no need to edit
 dimcol = (barcolor[0]//4, barcolor[1]//4, barcolor[2]//4)
 AP_NAME = config.AP_NAME
 AP_DOMAIN = config.AP_DOMAIN
 AP_TEMPLATE_PATH = config.AP_TEMPLATE_PATH 
 WIFI_FILE = config.WIFI_FILE
 IGNORE_HARDCODED = config.IGNORE_HARDCODED
+rDURpPXL = config.RESTOREANIDURATIONPERPIXEL
 
 def machine_reset():
     utime.sleep(1)
@@ -107,13 +109,13 @@ def whatday(weekday):
 
 def set_time(worldtimeurl):
         print('Grab time: ', worldtimeurl)
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'} # type: ignore
         try:
             response = urequests.get(worldtimeurl, headers=headers)
         except:
             print('Problem Getting Time')
         # parse JSON
-        parsed = response.json()
+        parsed = response.json() # type: ignore
         datetime_str = str(parsed["currentLocalTime"])
         year = int(datetime_str[0:4])
         month = int(datetime_str[5:7])
@@ -238,21 +240,32 @@ def wheel(pos):
     return (r, g, b)
 
 
-def rainbow_cycle(np):
+def rainbow_cycle(np, cycle=1):
     print ('Rainbow!')
-    for j in range(255):
-        for i in range(n):
-            pixel_index = (i * 256 // n) + j
-            np[i] = wheel(pixel_index & 255)
-        np.write()
+    for x in range(cycle):
+        for j in range(255):
+            for i in range(n):
+                pixel_index = (i * 256 // n) + j
+                np[i] = wheel(pixel_index & 255)
+            np.write()
 
 
 def atwork(clockin, clockout, time):
     work = False
-    if (time >= clockin) & (time <clockout):
+    if (time >= clockin) & (time < clockout):
         work = True
     return work
 
+
+def eventaniend(np):
+    ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
+    for i in range(n):
+        np[i] = (0, 0, 0)
+    for i in range(ledindex+1):
+        np[i] = barcolor
+        np.write()
+        time.sleep(rDURpPXL)
+    
 def blink(np, seconds):
     for j in range(seconds//2):
         for i in range(n):
@@ -263,50 +276,50 @@ def blink(np, seconds):
             np[i] = (0, 0, 0)
         np.write()
         time.sleep(1)
+    eventaniend(np)
                     
 def breathe(np, seconds):
-        nval = 0
-        n = np.n
-        index = 0
-        sleeptime = .05
-        breathespeed = .1
-        cycles = seconds/sleeptime
-        while index < cycles:
-            val = int((255/2)*(1+math.sin(nval)))
-            for j in range(n):
-                np[j]=(val, val , val)      # Set LED to a converted HSV value
-            np.write()
-            nval = (nval + breathespeed ) % 360
-            time.sleep(sleeptime)
-            index = index + 1
+    nval = 0
+    n = np.n
+    index = 0
+    sleeptime = .05
+    breathespeed = .1
+    cycles = seconds/sleeptime
+    while index < cycles:
+        val = int((255/2)*(1+math.sin(nval)))
+        for j in range(n):
+            np[j]=(val, val , val)      # Set LED to a converted HSV value
+        np.write()
+        nval = (nval + breathespeed ) % 360
+        time.sleep(sleeptime)
+        index = index + 1
+    eventaniend(np)
 
-            
 
 def sorted_appointments(array):
     # This is just a placeholder for when/if the google api sends garbled times
     print('Appointment times:')
     for x in range(len(array)):
-        array[x]=re.sub('.*T','',array[x])
+        array[x]=re.sub('.*T', '', array[x])
     array=sorted(array)
     for x in array:
         print(x)
     return array
     
 
-def application_mode():
-    global clockin, clockout
+def application_mode(np):
+    global clockin, clockout, hoursin, KeyboardExceptionCount
     print("Entering application mode.")
     count = 1
     # When you plug in, update rather than wait until the stroke of the next minute
     print("Connected to WiFi")
-    np = neopixel.NeoPixel(machine.Pin(p), n)
-    rainbow_cycle(np)
     time.sleep(1)
-    off(np)
-    led.off()
     dow, offset = set_time(worldtimeurl)
+    firstrun = True
     checkindex = 0
     appointment_times = []
+    led.off()
+    time.sleep(120)      # To not trigger clock out again
     print('Begin endless loop')
     while True:
         try:
@@ -322,6 +335,7 @@ def application_mode():
                 clockin = float(schedule[dayname][0]['clockin'])
                 clockout = float(schedule[dayname][0]['clockout'])
                 if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
+                    led.on()
                     appointment_times = []
                     clockin = 0
                     clockout = 0
@@ -334,17 +348,18 @@ def application_mode():
                         if IGNORE_HARDCODED is True:
                             clockin = timetohour(appointment_times[0])
                             clockout = timetohour(appointment_times[len(appointment_times)-1]) 
+                        led.off()
                     except:
                         print('Scheduling issues')
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
+            if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
+                machine.reset()
             if working is True:
                 # Draw the bar
                 bar(np, hoursin, clockin, clockout)
                 # Draw the events
                 addevents(np, appointment_times, clockin, clockout)
-                if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
-                    machine.reset()
                 if eventbool is False:
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
                     # Toggle the end led of the bar
@@ -362,6 +377,10 @@ def application_mode():
             # reset the google check index if needed
             if (checkindex > checkevery):
                 checkindex = 0
+            if firstrun:
+                firstrun = False
+                if working:
+                    eventaniend(np)
             np.write()
             time.sleep(1)
         except Exception as e:
@@ -371,6 +390,9 @@ def application_mode():
             machine.reset()
         except KeyboardInterrupt:
             off(np)
+            KeyboardExceptionCount += 1
+            if KeyboardExceptionCount == 1: eventaniend(np)
+            else: break
 
 
 def setup_mode():
@@ -408,8 +430,12 @@ def setup_mode():
     dns.run_catchall(ip)
     server.run()
 
-# Main Logic
 
+np = neopixel.NeoPixel(machine.Pin(p), n)
+rainbow_cycle(np, 3)
+off(np)
+
+# Main Logic
 # Figure out which mode to start up in...
 try:
     os.stat(WIFI_FILE)
@@ -424,13 +450,26 @@ try:
             # into setup mode to get new credentials from the user.
             print("Bad wifi connection!")
             print(wifi_credentials)
+            for i in range(0, n, 2):
+                np[i] = (100, 0, 0)
+                np.write()
+                time.sleep(15*2/n)
+            for i in reversed(range(n)):
+                np[i] = (100, 0, 0)
+                np.write()
+                time.sleep(15/n)
             os.remove(WIFI_FILE)
             machine_reset()
 
         print(f"Connected to wifi, IP address {ip_address}")
-        application_mode()  # Contains all the progress bar code
+        application_mode(np)  # Contains all the progress bar code
 
 except Exception:
     # Either no wifi configuration file found, or something went wrong,
     # so go into setup mode.
+    off(np)
+    led.on()
+    for i in range(0, n, 2):
+        np[i] = (100, 100, 0)
+        np.write()
     setup_mode()
