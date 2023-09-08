@@ -374,7 +374,8 @@ def application_mode(np):
                 checkindex = 0
             if firstrun:
                 firstrun = False
-                eventaniend(np)
+                if working:
+                    eventaniend(np)
             np.write()
             time.sleep(1)
         except Exception as e:
