@@ -201,6 +201,7 @@ def off(np):
     for i in range(n):
         np[i] = (0, 0, 0)
         np.write()
+        time.sleep(rDURpPXL)
 
 def hourtoindex(hoursin, clockin, clockout):
     index = int(math.floor(n*(hoursin-clockin)/(clockout-clockin)))
@@ -240,13 +241,14 @@ def wheel(pos):
     return (r, g, b)
 
 
-def rainbow_cycle(np):
+def rainbow_cycle(np, cycle=1):
     print ('Rainbow!')
-    for j in range(255):
-        for i in range(n):
-            pixel_index = (i * 256 // n) + j
-            np[i] = wheel(pixel_index & 255)
-        np.write()
+    for x in range(cycle):
+        for j in range(255):
+            for i in range(n):
+                pixel_index = (i * 256 // n) + j
+                np[i] = wheel(pixel_index & 255)
+            np.write()
 
 
 def atwork(clockin, clockout, time):
@@ -427,7 +429,7 @@ def setup_mode():
 
 
 np = neopixel.NeoPixel(machine.Pin(p), n)
-rainbow_cycle(np)
+rainbow_cycle(np, 3)
 off(np)
 led.off()
 
