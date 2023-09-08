@@ -262,7 +262,7 @@ def eventaniend(np):
     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
     for i in range(n):
         np[i] = (0, 0, 0)
-    for i in range(ledindex):
+    for i in range(ledindex+1):
         np[i] = barcolor
         np.write()
         time.sleep(rDURpPXL)
@@ -311,7 +311,7 @@ def sorted_appointments(array):
 def application_mode(np):
     global clockin, clockout, hoursin, KeyboardExceptionCount
     print("Entering application mode.")
-    count = 0
+    count = 1
     # When you plug in, update rather than wait until the stroke of the next minute
     print("Connected to WiFi")
     time.sleep(1)
