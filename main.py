@@ -319,6 +319,7 @@ def application_mode(np):
     firstrun = True
     checkindex = 0
     appointment_times = []
+    led.off()
     print('Begin endless loop')
     while True:
         try:
@@ -431,7 +432,6 @@ def setup_mode():
 np = neopixel.NeoPixel(machine.Pin(p), n)
 rainbow_cycle(np, 3)
 off(np)
-led.off()
 
 # Main Logic
 # Figure out which mode to start up in...
@@ -466,6 +466,7 @@ except Exception:
     # Either no wifi configuration file found, or something went wrong,
     # so go into setup mode.
     off(np)
+    led.on()
     for i in range(0, n, 2):
         np[i] = (100, 100, 0)
         np.write()
