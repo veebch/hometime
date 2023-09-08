@@ -201,7 +201,6 @@ def off(np):
     for i in range(n):
         np[i] = (0, 0, 0)
         np.write()
-        time.sleep(rDURpPXL/4)
 
 def hourtoindex(hoursin, clockin, clockout):
     index = int(math.floor(n*(hoursin-clockin)/(clockout-clockin)))
