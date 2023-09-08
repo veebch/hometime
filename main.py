@@ -319,6 +319,7 @@ def application_mode(np):
     checkindex = 0
     appointment_times = []
     led.off()
+    time.sleep(60)      # To not trigger clock out again
     print('Begin endless loop')
     while True:
         try:
@@ -350,7 +351,7 @@ def application_mode(np):
                         print('Scheduling issues')
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
-            if abs(hoursin - clockout) < 40/3600: # If we're within 40 seconds of clockout reset
+            if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
                 machine.reset()
             if working is True:
                 # Draw the bar
