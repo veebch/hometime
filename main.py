@@ -319,7 +319,7 @@ def application_mode(np):
     checkindex = 0
     appointment_times = []
     led.off()
-    time.sleep(60)      # To not trigger clock out again
+    time.sleep(120)      # To not trigger clock out again
     print('Begin endless loop')
     while True:
         try:
@@ -335,6 +335,7 @@ def application_mode(np):
                 clockin = float(schedule[dayname][0]['clockin'])
                 clockout = float(schedule[dayname][0]['clockout'])
                 if googlecalbool is True: # overwrite clockin/clockout times if Google Calendar is to be used
+                    led.on()
                     appointment_times = []
                     clockin = 0
                     clockout = 0
@@ -347,6 +348,7 @@ def application_mode(np):
                         if IGNORE_HARDCODED is True:
                             clockin = timetohour(appointment_times[0])
                             clockout = timetohour(appointment_times[len(appointment_times)-1]) 
+                        led.off()
                     except:
                         print('Scheduling issues')
             working = atwork(clockin, clockout, hoursin)
