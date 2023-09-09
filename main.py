@@ -215,7 +215,7 @@ def eventnow(hoursin, response):
         response = response[1:-1]
     for x in response:
         hour = timetohour(x)
-        if abs(hour - hoursin) < eventanidur/3600:
+        if hour <= hoursin and abs(hour - hoursin) < eventanidur/3600:
             event = True
     return event
 
@@ -354,13 +354,11 @@ def application_mode(np):
                         print('Scheduling issues')
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
-            if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
+            if clockout <= hoursin and abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
                 machine.reset()
             if working is True:
                 # Draw the bar
                 bar(np, hoursin, clockin, clockout)
-                # Draw the events
-                addevents(np, appointment_times, clockin, clockout)
                 eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                 if eventbool is False:
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
@@ -374,6 +372,8 @@ def application_mode(np):
                     # Just the tip of the bar
                 elif "Breathe" in eventanimation: breathe(np, eventanidur)
                 elif "Blink" in eventanimation: blink(np, eventanidur)    
+                # Draw the events
+                addevents(np, appointment_times, clockin, clockout)
                 if flip == True:
                     np = flipit(np,n)
             # reset the google check index if needed
