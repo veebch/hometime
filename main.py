@@ -211,6 +211,8 @@ def hourtoindex(hoursin, clockin, clockout):
 
 def eventnow(hoursin, response):
     event = False
+    if IGNORE_HARDCODED:
+        response = response[1:-1]
     for x in response:
         hour = timetohour(x)
         if abs(hour - hoursin) < eventanidur/3600:
@@ -319,6 +321,7 @@ def application_mode(np):
     checkindex = 0
     appointment_times = []
     led.off()
+    print("Waiting 2 Minutes to not trigger clockout again")
     time.sleep(120)      # To not trigger clock out again
     print('Begin endless loop')
     while True:
@@ -339,12 +342,10 @@ def application_mode(np):
                     appointment_times = []
                     clockin = 0
                     clockout = 0
-                    eventbool = False
                     print('Updating from Google Calendar')
                     try:
                         appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                         appointment_times = sorted_appointments(appointment_times)
-                        eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                         if IGNORE_HARDCODED is True:
                             clockin = timetohour(appointment_times[0])
                             clockout = timetohour(appointment_times[len(appointment_times)-1]) 
@@ -360,6 +361,7 @@ def application_mode(np):
                 bar(np, hoursin, clockin, clockout)
                 # Draw the events
                 addevents(np, appointment_times, clockin, clockout)
+                eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                 if eventbool is False:
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
                     # Toggle the end led of the bar
