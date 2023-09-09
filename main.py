@@ -211,9 +211,11 @@ def hourtoindex(hoursin, clockin, clockout):
 
 def eventnow(hoursin, response):
     event = False
+    if IGNORE_HARDCODED:
+        response = response[1:-1]
     for x in response:
         hour = timetohour(x)
-        if abs(hour - hoursin) < eventanidur/3600:
+        if hour <= hoursin and abs(hour - hoursin) < eventanidur/3600:
             event = True
     return event
 
@@ -319,6 +321,7 @@ def application_mode(np):
     checkindex = 0
     appointment_times = []
     led.off()
+    print("Waiting 2 Minutes to not trigger clockout again")
     time.sleep(120)      # To not trigger clock out again
     print('Begin endless loop')
     while True:
@@ -327,7 +330,7 @@ def application_mode(np):
             for i in range(n):
                 np[i] = (0, 0, 0)
             eventbool = False
-            checkindex = checkindex + 1
+            checkindex += 1
             now = time.gmtime()
             hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
             dayname = whatday(int(now[6]))
@@ -339,12 +342,10 @@ def application_mode(np):
                     appointment_times = []
                     clockin = 0
                     clockout = 0
-                    eventbool = False
                     print('Updating from Google Calendar')
                     try:
                         appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                         appointment_times = sorted_appointments(appointment_times)
-                        eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                         if IGNORE_HARDCODED is True:
                             clockin = timetohour(appointment_times[0])
                             clockout = timetohour(appointment_times[len(appointment_times)-1]) 
@@ -353,13 +354,12 @@ def application_mode(np):
                         print('Scheduling issues')
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
-            if abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
+            if clockout <= hoursin and abs(hoursin - clockout) < 60/3600: # If we're within 60 seconds of clockout reset
                 machine.reset()
             if working is True:
                 # Draw the bar
                 bar(np, hoursin, clockin, clockout)
-                # Draw the events
-                addevents(np, appointment_times, clockin, clockout)
+                eventbool = eventnow(hoursin, appointment_times[::2]) # only the even elements (starttimes)
                 if eventbool is False:
                     ledindex = min(hourtoindex(hoursin, clockin, clockout), n)
                     # Toggle the end led of the bar
@@ -372,6 +372,8 @@ def application_mode(np):
                     # Just the tip of the bar
                 elif "Breathe" in eventanimation: breathe(np, eventanidur)
                 elif "Blink" in eventanimation: blink(np, eventanidur)    
+                # Draw the events
+                addevents(np, appointment_times, clockin, clockout)
                 if flip == True:
                     np = flipit(np,n)
             # reset the google check index if needed
@@ -432,7 +434,7 @@ def setup_mode():
 
 
 np = neopixel.NeoPixel(machine.Pin(p), n)
-rainbow_cycle(np, 3)
+rainbow_cycle(np)
 off(np)
 
 # Main Logic
