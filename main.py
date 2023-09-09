@@ -330,7 +330,7 @@ def application_mode(np):
             for i in range(n):
                 np[i] = (0, 0, 0)
             eventbool = False
-            checkindex = checkindex + 1
+            checkindex += 1
             now = time.gmtime()
             hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
             dayname = whatday(int(now[6]))
@@ -434,7 +434,7 @@ def setup_mode():
 
 
 np = neopixel.NeoPixel(machine.Pin(p), n)
-rainbow_cycle(np, 3)
+rainbow_cycle(np)
 off(np)
 
 # Main Logic
