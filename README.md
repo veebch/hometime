@@ -82,7 +82,7 @@ Done! All the required files should now be on the Pico. Whenever you connect to 
 
 ## Setup
 
-On the first run, the pico will realise that it has no valid WiFi credentials and start up as an access point. To add them, on another WiFi enabled device (eg smartphone) connect to the network '**veebprojects**'. You'll then be prompted to provide login credentials for your WiFi network. Once you've added these, the pico will restart and connect to WiFi.
+On the first run, the pico will realise that it has no valid WiFi credentials and start up as an access point. The neopixels will turn red to indicate that it is in setup mode. To add WiFi credentials, on another WiFi enabled device (eg smartphone) connect to the network '**veebprojects**'. You'll then be prompted to provide login credentials for your WiFi network. Once you've added these, the pico will restart and connect to WiFi.
 
 ## Configuration
 
