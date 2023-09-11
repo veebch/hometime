@@ -1,15 +1,8 @@
+# Calendar
+
 CALENDAR = "INSERT YOUR CALENDAR NAME"        # "@group.calendar.google.com" also has to be in the string
 APIKEY = "INSERT YOUR APIKEY"
 TIMEZONE = "Europe/Zurich"
-PIXELS = 144
-GPIOPIN = 15
-BARCOL = (0, 100, 0)                            # Color in RGB from 0 to 255
-EVENTCOL = [(255, 255, 255), (255, 255, 0)]     # list of tuples used as meeting colors, if you only use one: [(255, 255, 255)]
-FLIP = False                                    # Flip display (set to True if the strip runs from right to left)
-TIPANI = "Blink"    # [Blink | Dim | None]      # Animation at the end of the progress (This has to be a string)
-EVENTANI = "Blink"  # [Blink | Breathe | None]  # The animation used when an event is triggert. (This has to be a string)
-EVENTANIDURATION = 30                           # Length of the animation in seconds
-RESTOREANIDURATIONPERPIXEL = 0.05               # The delay of pixels in the restoring animation
 GOOGLECALBOOL = True                            # Boolean for whether to check google calendar page
 GOOGLEREFRESH = 60                              # Seconds between google calendar refresh
 IGNORE_HARDCODED = False                        # Set to True if you want Clock in at the start of first meeting and Clockout at end of last meeting
@@ -22,6 +15,17 @@ SCHEDULE = {                                    # This doesn't get used if IGNOR
     "saturday":   [{"clockin": "0",   "clockout": "0"}],
     "sunday":     [{"clockin": "0",   "clockout": "0"}]
 }
+
+# Neopixel
+
+PIXELS = 144                                    # The number of pixels on the neopixel strip
+GPIOPIN = 15                                    # The pin that the signal wire of the LED strip is connected to
+BARCOL = (0, 100, 0)                            # Color in RGB from 0 to 255
+EVENTCOL = [(255, 255, 255), (255, 255, 0)]     # list of tuples used as meeting colors, if you only use one: [(255, 255, 255)]
+FLIP = False                                    # Flip display (set to True if the strip runs from right to left)
+
+# Access Point
+
 AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
