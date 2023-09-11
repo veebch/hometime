@@ -42,8 +42,8 @@ calendar = config.CALENDAR
 api_key = config.APIKEY
 n = config.PIXELS           # Number of pixels on strip
 p = config.GPIOPIN          # GPIO pin that data line of lights is connected to
-barcolor = config.BARCOL    # RGB for bar color
-eventcollist = config.EVENTCOL# RGB for event color
+barcolourlist = config.BARCOL	# RGB for bar color
+eventcolourlist = config.EVENTCOL	# RGB for event color
 schedule = config.SCHEDULE  # Working hours in config file (only used if google calendar not used)
 flip = config.FLIP
 googlecalbool = config.GOOGLECALBOOL
@@ -142,11 +142,26 @@ def set_time(worldtimeurl):
         return dow,offset
     
 
-def bar(np, upto, clockin, clockout):
+def bar(np, upto, clockin, clockout, event):
     barupto = hourtoindex(upto, clockin, clockout)
+    if event is False:
+        colourbar = barcolourlist[0]
+    else:
+        colourbar = barcolourlist[1]
     for i in range(barupto):
-        np[i] = barcolor
+        np[i] = colourbar
         
+
+def eventnow(hoursin, response):
+    # This returns whether you're currently in a meeting and will be used to change the colour of the bar
+    event = False
+    for i in range(lenth(response)-1):
+        hourstart = timetohour(response[i])
+        hourend = timetohour(repsonse[i+1])
+        if (hourstart >= hoursin) & (hourend <= hoursin) :
+            event = True
+    return event
+   
 
 def flipit(np,n):
     temp=[0]*n
@@ -192,7 +207,6 @@ def addevents(np, response, clockin, clockout):
     except:
         pass
         
-    
 
 def valid(index):
     valid = False
@@ -312,10 +326,15 @@ def progress_bar():
     print("Connected to WiFi")
     np = neopixel.NeoPixel(machine.Pin(p), n)
     rainbow_cycle(np)
+    time.sleep(1)
+    off(np)
+    led.off()
     # Set time and initialise variables
     dow, offset = set_time(worldtimeurl)
     clockin = 0
     clockout = 0
+    eventbool = False
+    lastloopwork = False
     appointment_times = []
     while True:
         try:
@@ -332,6 +351,7 @@ def progress_bar():
                 print('Updating from Google Calendar')
                 try:
                     appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
+                    eventbool = eventnow(hoursin, appointment_times)
                     if ignorehardcoded is True:
                         clockin = timetohour(appointment_times[0])
                         clockout = timetohour(appointment_times[len(appointment_times)-1]) 
@@ -342,11 +362,14 @@ def progress_bar():
             if working is True: # These only need to be added to the bar if you're working
                 # Add the events and bar to np and flip if needed
                 addevents(np, appointment_times, clockin, clockout)
-                bar(np, hoursin, clockin, clockout)
+                bar(np, hoursin, clockin, clockout,eventbool)
                 if flip == True:
                     np = flipit(np,n)
             np.write()
             gc.collect()  # clean up garbage in memory
+            if (lastloopwork is True) & (working is False):
+                machine_reset()
+            lastloopwork = working
             time.sleep(checkevery)
         except Exception as e:
             print('Exception:',e)
@@ -384,4 +407,5 @@ if __name__ == "__main__":
     main()
 
   
+
 
