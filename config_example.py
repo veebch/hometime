@@ -23,10 +23,3 @@ GPIOPIN = 15                                    # The pin that the signal wire o
 BARCOL = (0, 100, 0)                            # Color in RGB from 0 to 255
 EVENTCOL = [(255, 255, 255), (255, 255, 0)]     # list of tuples used as meeting colors, if you only use one: [(255, 255, 255)]
 FLIP = False                                    # Flip display (set to True if the strip runs from right to left)
-
-# Access Point
-
-AP_NAME = "veebprojects"
-AP_DOMAIN = "pipico.net"
-AP_TEMPLATE_PATH = "ap_templates"
-WIFI_FILE = "wifi.json"
