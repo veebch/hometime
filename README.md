@@ -27,7 +27,7 @@ There's a pretty comprehensive start-to-finish walkthrough by Dan Ionescu [here]
 
 The progress bar displays your progress through the working day. It connects to wifi, grabs the time from a [time api](https://timeapi.io), then shows you how far through the day you are.
 
-The events are maintained in a public Google calendar, and connection parameters are stored in the config file. For getting an API key, visit https://console.cloud.google.com/apis/credentials.
+The events are maintained in a public Google calendar, and connection parameters are stored in the config file. For getting an API key, visit https://console.cloud.google.com/apis/credentials. For getting the calendar link just select 'share calendar' on google calendar and copy the link (it ends in `@group.calendar.google.com`)
 
 If it is outside the working hours, no lights show.
 
