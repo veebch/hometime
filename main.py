@@ -114,13 +114,14 @@ def whatday(weekday):
 
 def set_time(worldtimeurl):
         print('Grab time:',worldtimeurl)
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         try:
-            response = urequests.get(worldtimeurl, headers=headers)
+            response = urequests.get(worldtimeurl)
         except:
-            print('Problem Getting Time')
+            print('Problem with',worldtimeurl)
         # parse JSON
+        print('got response')
         parsed = response.json()
+        print('parsed')
         datetime_str = str(parsed["currentLocalTime"])
         year = int(datetime_str[0:4])
         month = int(datetime_str[5:7])
@@ -140,7 +141,7 @@ def set_time(worldtimeurl):
                       0))
         dow = time.localtime()[6]
         return dow,offset
-    
+
 
 def bar(np, upto, clockin, clockout, event):
     barupto = hourtoindex(upto, clockin, clockout)
@@ -152,14 +153,19 @@ def bar(np, upto, clockin, clockout, event):
         np[i] = colourbar
         
 
-def eventnow(hoursin, response):
+def eventnow(hoursin, googletimes):
     # This returns whether you're currently in a meeting and will be used to change the colour of the bar
     event = False
-    for i in range(lenth(response)-1):
-        hourstart = timetohour(response[i])
-        hourend = timetohour(repsonse[i+1])
-        if (hourstart >= hoursin) & (hourend <= hoursin) :
-            event = True
+    print('EventNow')
+    try:
+        for i in range(0,len(googletimes)-1,2):
+            hourstart = timetohour(googletimes[i])
+            hourend = timetohour(googletimes[i+1])
+            if ((hourstart <= hoursin) & (hourend >= hoursin)):
+                event = True
+                print('In an event, bar will change colour')
+    except:
+        pass
     return event
    
 
@@ -183,7 +189,6 @@ def timetohour(time_string):
     hours, minutes, seconds = time_part.split(":")
 
     parsed_time = int(hours)+int(minutes)/60+int(seconds)/3600
-
     return parsed_time
 
 
@@ -202,7 +207,7 @@ def addevents(np, response, clockin, clockout):
             start= indexes.pop()
             for i in range(start,end):
                 if valid(i):
-                    np[i] = eventcollist[index % len(eventcollist)]
+                    np[i] = eventcolourlist[index % len(eventcolourlist)]
             index = (index + 1) 
     except:
         pass
@@ -319,16 +324,10 @@ def wifi_setup_mode():
     server.run()
     
     
-def progress_bar():
-    global clockin, clockout
+def progress_bar(np):
     print("Entering Progress Bar Display Mode")
     # When you plug in, update rather than wait until the stroke of the next minute
     print("Connected to WiFi")
-    np = neopixel.NeoPixel(machine.Pin(p), n)
-    rainbow_cycle(np)
-    time.sleep(1)
-    off(np)
-    led.off()
     # Set time and initialise variables
     dow, offset = set_time(worldtimeurl)
     clockin = 0
@@ -381,7 +380,12 @@ def progress_bar():
 
 
 # Figure out which mode to start up in...
-def main(): 
+def main():
+    np = neopixel.NeoPixel(machine.Pin(p), n)
+    rainbow_cycle(np)
+    time.sleep(1)
+    off(np)
+    led.off()
     try:
         os.stat(WIFI_FILE)
         # File was found, attempt to connect to wifi...
@@ -396,7 +400,7 @@ def main():
                 os.remove(WIFI_FILE)
                 machine_reset()
             print(f"Connected to wifi, IP address {ip_address}")
-            progress_bar()  # Contains all the progress bar code
+            progress_bar(np)  # Contains all the progress bar code
 
     except Exception:
         # Either no wifi configuration file found, or something went wrong,
