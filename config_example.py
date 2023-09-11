@@ -1,6 +1,6 @@
 # Calendar
 
-CALENDAR = "INSERT YOUR CALENDAR NAME"        # "@group.calendar.google.com" also has to be in the string
+CALENDAR = "INSERT YOUR CALENDAR NAME"          # "@group.calendar.google.com" also has to be on the end of the string (see 'get shareable link' on calendar on google 
 APIKEY = "INSERT YOUR APIKEY"
 TIMEZONE = "Europe/Zurich"
 GOOGLECALBOOL = True                            # Boolean for whether to check google calendar page
@@ -20,6 +20,6 @@ SCHEDULE = {                                    # This doesn't get used if IGNOR
 
 PIXELS = 144                                    # The number of pixels on the neopixel strip
 GPIOPIN = 15                                    # The pin that the signal wire of the LED strip is connected to
-BARCOL = (0, 100, 0)                            # Color in RGB from 0 to 255
+BARCOL = [(0, 100, 0),(0,0,100)]                # Color in RGB from 0 to 255 of the bar when in and not in meeting respectively
 EVENTCOL = [(255, 255, 255), (255, 255, 0)]     # list of tuples used as meeting colors, if you only use one: [(255, 255, 255)]
 FLIP = False                                    # Flip display (set to True if the strip runs from right to left)
