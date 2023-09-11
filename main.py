@@ -20,6 +20,7 @@
 
 from phew import access_point, connect_to_wifi, is_connected_to_wifi, dns, server
 from phew.template import render_template
+from random import choice
 import machine
 import _thread
 import utime
@@ -53,7 +54,7 @@ led.off()
 led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
-checkevery = config.REFRESH   # Number of seconds before refreshing neopixel
+checkevery = config.REFRESH   # Number of seconds for interval refreshing neopixel
 AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
@@ -404,7 +405,10 @@ def main():
 
     except Exception:
         # Either no wifi configuration file found, or something went wrong,
-        # so go into setup mode.
+        # so go into setup mode
+        for i in range(0, n):
+            np[i] = (choice((0,255)), 0, 0)
+        np.write()    
         wifi_setup_mode()
     
 if __name__ == "__main__":
