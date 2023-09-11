@@ -8,7 +8,7 @@
 A physical LED progress bar for the working day based on information from a public Google Calendar. The bar uses an addressable led strip and a Raspberry Pi Pico W. It:
 
 - keeps you posted on how much of the workday (start of first meeting to end of last meeting) has already passed, 
-- flashes when it's time for an event on the calendar, 
+- changes colour when you're scheduled to be doing something,
 - rewards you with a pretty rainbow at hometime.
 
 ## Videos
