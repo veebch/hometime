@@ -308,27 +308,20 @@ def wifi_setup_mode():
 def progress_bar():
     global clockin, clockout
     print("Entering Progress Bar Display Mode")
-    count = 1
     # When you plug in, update rather than wait until the stroke of the next minute
     print("Connected to WiFi")
     np = neopixel.NeoPixel(machine.Pin(p), n)
     rainbow_cycle(np)
-    time.sleep(1)
-    off(np)
-    led.off()
+    # Set time and initialise variables
     dow, offset = set_time(worldtimeurl)
-    checkindex = 0
     clockin = 0
     clockout = 0
     appointment_times = []
-    print('Begin endless loop')
     while True:
         try:
             # wipe led clean before adding the pixels that represent the bar
             for i in range(n):
                 np[i] = (0, 0, 0)
-            eventbool = False				# Set event status to False
-            checkindex = checkindex + 1 	# This is the index that determines whether google is checked
             now = time.gmtime()
             hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
             dayname = whatday(int(now[6]))
@@ -389,3 +382,6 @@ def main():
     
 if __name__ == "__main__":
     main()
+
+  
+
