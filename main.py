@@ -53,7 +53,7 @@ led.off()
 led.on()
 time.sleep(1)
 eventbool = False # Initialising, no need to edit
-checkevery = 10   # Number of cycles before refreshing schedule/clocking times
+checkevery = config.REFRESH   # Number of seconds before refreshing neopixel
 AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
