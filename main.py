@@ -368,7 +368,7 @@ def progress_bar(np):
             np.write()
             gc.collect()  # clean up garbage in memory
             if (lastloopwork is True) & (working is False):
-                machine_reset()
+                machine_reset() # You were working last cycle, now you aren't - it's hometime
             lastloopwork = working
             time.sleep(checkevery)
         except Exception as e:
