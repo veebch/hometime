@@ -274,23 +274,6 @@ def atwork(clockin, clockout, time):
     return work
 
 
-def breathe(np, seconds):
-        nval = 0
-        n = np.n
-        index = 0
-        sleeptime = .05
-        breathespeed = .1
-        cycles = seconds/sleeptime
-        while index < cycles:
-            val = int((255/2)*(1+math.sin(nval)))
-            for j in range(n):
-                np[j]=(val, val , val)      # Set LED to a converted HSV value
-            np.write()
-            nval = (nval + breathespeed ) % 360
-            time.sleep(sleeptime)
-            index = index + 1
-
-
 def wifi_setup_mode():
     print("Entering setup mode...")
 
