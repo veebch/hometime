@@ -361,7 +361,8 @@ def progress_bar(np):
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
             if working is True: # These only need to be added to the bar if you're working
                 # Add the events and bar to np and flip if needed
-                addevents(np, appointment_times, clockin, clockout)
+                if googlecalbool is True: 
+                    addevents(np, appointment_times, clockin, clockout)
                 bar(np, hoursin, clockin, clockout,eventbool)
                 if flip == True:
                     np = flipit(np,n)
