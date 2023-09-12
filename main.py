@@ -58,11 +58,10 @@ checkevery = config.REFRESH   # Number of seconds for interval refreshing neopix
 AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
-WIFI_FILE = "wifi.json" 
-if (ignorehardcoded is True) & (googlecalbool is False):
-    print('Incompatible options. Setting ignorehardcoded to False.')
+WIFI_FILE = "wifi.json"
+if (ignorehardcoded is True) and (googlecalbool is False):
+    print('incompatible options, setting ignorehardcoded to False')
     ignorehardcoded = False
-
 
 def machine_reset():
     utime.sleep(1)
@@ -350,7 +349,7 @@ def progress_bar(np):
             if ignorehardcoded is False:
                 clockin = float(schedule[dayname][0]['clockin'])
                 clockout = float(schedule[dayname][0]['clockout'])
-            if googlecalbool is True: 
+            if googlecalbool:
                 print('Updating from Google Calendar')
                 try:
                     appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
@@ -364,17 +363,16 @@ def progress_bar(np):
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
             if working is True: # These only need to be added to the bar if you're working
                 # Add the events and bar to np and flip if needed
-                if googlecalbool is True: 
-                    addevents(np, appointment_times, clockin, clockout)
+                if googlecalbool: addevents(np, appointment_times, clockin, clockout)
                 bar(np, hoursin, clockin, clockout,eventbool)
-                if flip == True:
-                    np = flipit(np,n)
+                if flip: np = flipit(np,n)
             np.write()
             gc.collect()  # clean up garbage in memory
             if (lastloopwork is True) & (working is False):
-                machine_reset() # You were working last cycle, now you aren't - it's hometime
+                # The same approach could also be used to trigger event animations 
+                machine_reset() # You were working last cycle, now you aren't - it's hometime        
             lastloopwork = working
-            time.sleep(checkevery)
+            time.sleep(checkevery) 
         except Exception as e:
             print('Exception:',e)
             off(np)
@@ -417,7 +415,3 @@ def main():
     
 if __name__ == "__main__":
     main()
-
-  
-
-
