@@ -58,7 +58,10 @@ checkevery = config.REFRESH   # Number of seconds for interval refreshing neopix
 AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
-WIFI_FILE = "wifi.json"
+WIFI_FILE = "wifi.json" 
+if (ignorehardcoded is True) & (googlecalbool is False):
+    print('Incompatible options. Setting ignorehardcoded to False.')
+    ignorehardcoded = False
 
 
 def machine_reset():
