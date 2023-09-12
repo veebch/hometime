@@ -370,6 +370,10 @@ def progress_bar(np):
             gc.collect()  # clean up garbage in memory
             if (lastloopwork is True) & (working is False):
                 # For event animations, use interrupts so that the time is exactly right
+                rainbow_cycle(np)
+                time.sleep(1)
+                off(np)
+                led.off()
                 machine_reset() # You were working last cycle, now you aren't - it's hometime        
             lastloopwork = working
             time.sleep(checkevery) 
@@ -385,10 +389,6 @@ def progress_bar(np):
 # Figure out which mode to start up in...
 def main():
     np = neopixel.NeoPixel(machine.Pin(p), n)
-    rainbow_cycle(np)
-    time.sleep(1)
-    off(np)
-    led.off()
     try:
         os.stat(WIFI_FILE)
         # File was found, attempt to connect to wifi...
