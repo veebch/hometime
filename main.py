@@ -369,7 +369,7 @@ def progress_bar(np):
             np.write()
             gc.collect()  # clean up garbage in memory
             if (lastloopwork is True) & (working is False):
-                # The same approach could also be used to trigger event animations 
+                # For event animations, use interrupts so that the time is exactly right
                 machine_reset() # You were working last cycle, now you aren't - it's hometime        
             lastloopwork = working
             time.sleep(checkevery) 
