@@ -64,7 +64,7 @@ if (ignorehardcoded is True) and (googlecalbool is False):
     ignorehardcoded = False
 
 def machine_reset():
-    utime.sleep(1)
+    time.sleep(1)
     print("Resetting...")
     machine.reset()
 
