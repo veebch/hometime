@@ -116,34 +116,34 @@ def whatday(weekday):
 
 
 def set_time(worldtimeurl):
-        print('Grab time:',worldtimeurl)
-        try:
-            response = urequests.get(worldtimeurl)
-        except:
-            print('Problem with',worldtimeurl)
-        # parse JSON
-        print('got response')
-        parsed = response.json()
-        print('parsed')
-        datetime_str = str(parsed["currentLocalTime"])
-        year = int(datetime_str[0:4])
-        month = int(datetime_str[5:7])
-        day = int(datetime_str[8:10])
-        hour = int(datetime_str[11:13])
-        minute = int(datetime_str[14:16])
-        second = int(datetime_str[17:19])
-        offset = int(parsed["currentUtcOffset"]["seconds"])/3600
-        # update internal RTC
-        machine.RTC().datetime((year,
-                      month,
-                      day,
-                      0,
-                      hour,
-                      minute,
-                      second,
-                      0))
-        dow = time.localtime()[6]
-        return dow,offset
+    print('Grab time:',worldtimeurl)
+    try:
+        response = urequests.get(worldtimeurl)
+    except:
+        print('Problem with',worldtimeurl)
+    # parse JSON
+    print('got response')
+    parsed = response.json()
+    print('parsed')
+    datetime_str = str(parsed["currentLocalTime"])
+    year = int(datetime_str[0:4])
+    month = int(datetime_str[5:7])
+    day = int(datetime_str[8:10])
+    hour = int(datetime_str[11:13])
+    minute = int(datetime_str[14:16])
+    second = int(datetime_str[17:19])
+    offset = int(parsed["currentUtcOffset"]["seconds"])/3600
+    # update internal RTC
+    machine.RTC().datetime((year,
+                  month,
+                  day,
+                  0,
+                  hour,
+                  minute,
+                  second,
+                  0))
+    dow = time.localtime()[6]
+    return dow,offset
 
 
 def bar(np, upto, clockin, clockout, event):
