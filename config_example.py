@@ -12,7 +12,7 @@ SCHEDULE = {                                    # This doesn't get used if IGNOR
     "wednesday":  [{"clockin": "8",   "clockout": "17"}],
     "thursday":   [{"clockin": "8",   "clockout": "17"}],
     "friday":     [{"clockin": "8",   "clockout": "17"}],
-    "saturday":   [{"clockin": "0",   "clockout": "0"}],
+    "saturday":   [{"clockin": "0",   "clockout": "0"}],    # I don't roll on shabbos
     "sunday":     [{"clockin": "0",   "clockout": "0"}]
 }
 
