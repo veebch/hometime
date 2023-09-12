@@ -387,7 +387,6 @@ def main():
                 machine_reset()
             print(f"Connected to wifi, IP address {ip_address}")
             progress_bar(np)  # Contains all the progress bar code
-
     except Exception:
         # Either no wifi configuration file found, or something went wrong,
         # so go into setup mode
