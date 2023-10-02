@@ -1,6 +1,6 @@
 """
     Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
-    PoC, fok and make it better
+    Proof of Concept. Fork the repository and make it better
     
      Copyright (C) 2023 Veeb Projects https://veeb.ch
 
