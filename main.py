@@ -59,6 +59,8 @@ AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
 WIFI_FILE = "wifi.json"
+twocolor = config.twocolor
+
 if (ignorehardcoded is True) and (googlecalbool is False):
     print('incompatible options, setting ignorehardcoded to False')
     ignorehardcoded = False
@@ -148,10 +150,10 @@ def set_time(worldtimeurl):
 
 def bar(np, upto, clockin, clockout, event):
     barupto = hourtoindex(upto, clockin, clockout)
-    if event is False:
-        colourbar = barcolourlist[0]
-    else:
+    if event and twocolor is False:
         colourbar = barcolourlist[1]
+    else:
+        colourbar = barcolourlist[0]
     for i in range(barupto):
         np[i] = colourbar
         
@@ -273,7 +275,57 @@ def atwork(clockin, clockout, time):
         work = True
     return work
 
+def get_progress(hoursin, googletimes):
+    
+    try:
+        for i in range(0, len(googletimes)-1, 2):
+            hourstart = timetohour(googletimes[i])
+            hourend = timetohour(googletimes[i+1])
+    except:
+        pass
+    barupto = hourtoindex(hoursin, hourstart, hourend)
+    for i in range(n):
+        eventpixel = False
+    for i in range(barupto):
+        eventpixel = True
+    return eventpixel
+        
+def draw_overlay(np, event, hoursin, googletimes):
+    if event == True:
+        color = [barcolourlist[0], eventcolourlist[0]]                  # Example: [(0, 100, 0), (0, 0, 100)]
+        color = tuple(map(lambda y: sum(y) / int(len(y)), zip(*color))) # Get average of tuples: (0, 50, 50)
+        color = tuple([int(2*x) for x in color])                        # Multiply tuples by two for same brightness: (0, 100, 100)
+        
+        eventprogress = get_progress(hoursin, googletimes)
+        
+        for i in range(n):
+            if eventprogress[i] == True:
+                if np[i] == barcolourlist[0]:
+                    np[i] == color
+                else:
+                    np[i] == eventcolourlist[0]
+    return event
 
+def remove_overlay(np):
+    color = [barcolourlist[0], eventcolourlist[0]]                  # Example: [(0, 100, 0), (0, 0, 100)]
+    color = tuple(map(lambda y: sum(y) / int(len(y)), zip(*color))) # Get average of tuples: (0, 50, 50)
+    color = tuple([int(2*x) for x in color])
+    if flip == True:
+        for i in range(n):
+            if np[i] == color:
+                np[i] == barcolourlist[0]
+            else:
+                np[i] == (0, 0, 0)
+            time.sleep(0.005)
+    else:
+        for i in reversed(range(n)):
+            if np[i] == color:
+                np[i] == barcolourlist[0]
+            else:
+                np[i] == (0, 0, 0)
+            time.sleep(0.005)
+                
+    
 def wifi_setup_mode():
     print("Entering setup mode...")
 
@@ -345,10 +397,17 @@ def progress_bar(np):
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
             if working is True: # These only need to be added to the bar if you're working
-                # Add the events and bar to np and flip if needed
-                if googlecalbool: addevents(np, appointment_times, clockin, clockout)
-                bar(np, hoursin, clockin, clockout,eventbool)
-                if flip: np = flipit(np,n)
+                bar(np, hoursin, clockin, clockout, eventbool)
+                if googlecalbool:
+                    if twocolor:
+                        if eventbool == False:
+                            addevents(np, appointment_times, clockin, clockout)
+                            if lastevent:
+                                remove_overlay(np, appointment_times, clockin, clockout)
+                                lastevent = False
+                        else: lastevent = draw_overlay(np, eventbool, hoursin, appointment_times)
+                    else: addevents(np, appointment_times, clockin, clockout)
+                if flip: np = flipit(np, n)
             np.write()
             gc.collect()  # clean up garbage in memory
             if (lastloopwork is True) & (working is False):
