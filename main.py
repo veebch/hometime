@@ -441,7 +441,7 @@ def main():
                 # into setup mode to get new credentials from the user.
                 print("Bad wifi connection!")
                 print(wifi_credentials)
-                # os.remove(WIFI_FILE)
+                os.remove(WIFI_FILE)
                 machine_reset()
             print(f"Connected to wifi, IP address {ip_address}")
             progress_bar(np)  # Contains all the progress bar code
