@@ -53,8 +53,8 @@ led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
 time.sleep(1)
-eventbool = False # Initialising, no need to edit
-checkevery = config.REFRESH   # Number of seconds for interval refreshing neopixel
+checkevery = config.REFRESH   # Number of seconds for interval refreshinag neopixel
+checkgoogle = config.GOOGLE_REFRESH
 AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
@@ -161,16 +161,16 @@ def bar(np, upto, clockin, clockout, event):
 def eventnow(hoursin, googletimes):
     # This returns whether you're currently in a meeting and will be used to change the colour of the bar
     event = False
-    print('EventNow')
     try:
         for i in range(0,len(googletimes)-1,2):
             hourstart = timetohour(googletimes[i])
             hourend = timetohour(googletimes[i+1])
             if ((hourstart <= hoursin) & (hourend >= hoursin)):
                 event = True
-                print('In an event, bar will change colour')
+                print('EventNow')
     except:
         pass
+    
     return event
    
 
@@ -231,6 +231,7 @@ def off(np):
         np[i] = (0, 0, 0)
         np.write()
 
+
 def hourtoindex(hoursin, clockin, clockout):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if index < 0 or index > n:
@@ -275,36 +276,29 @@ def atwork(clockin, clockout, time):
         work = True
     return work
 
-def get_progress(hoursin, googletimes):
-    
-    try:
-        for i in range(0, len(googletimes)-1, 2):
-            hourstart = timetohour(googletimes[i])
-            hourend = timetohour(googletimes[i+1])
-    except:
-        pass
-    barupto = hourtoindex(hoursin, hourstart, hourend)
-    for i in range(n):
-        eventpixel = False
+def get_progress(hoursin, googletimes):        
+    for i in range(0, len(googletimes)-1, 2):
+        hourstart = timetohour(googletimes[i])
+        hourend = timetohour(googletimes[i+1])
+        if hourstart < hoursin < hourend:
+            barupto = hourtoindex(hoursin, hourstart, hourend)
+    eventpixel = [0] * n
     for i in range(barupto):
-        eventpixel = True
+        eventpixel[i] = 1
     return eventpixel
         
-def draw_overlay(np, event, hoursin, googletimes):
-    if event == True:
-        color = [barcolourlist[0], eventcolourlist[0]]                  # Example: [(0, 100, 0), (0, 0, 100)]
-        color = tuple(map(lambda y: sum(y) / int(len(y)), zip(*color))) # Get average of tuples: (0, 50, 50)
-        color = tuple([int(2*x) for x in color])                        # Multiply tuples by two for same brightness: (0, 100, 100)
-        
-        eventprogress = get_progress(hoursin, googletimes)
-        
-        for i in range(n):
-            if eventprogress[i] == True:
-                if np[i] == barcolourlist[0]:
-                    np[i] == color
-                else:
-                    np[i] == eventcolourlist[0]
-    return event
+def draw_overlay(np, hoursin, googletimes):
+    color = [barcolourlist[0], eventcolourlist[0]]                  # Example: [(0, 100, 0), (0, 0, 100)]
+    color = tuple(map(lambda y: sum(y) / int(len(y)), zip(*color))) # Get average of tuples: (0, 50, 50)
+    color = tuple([int(2*x) for x in color])                        # Multiply tuples by two for same brightness: (0, 100, 100)
+    eventprogress = get_progress(hoursin, googletimes)
+    for i in range(n):
+        if eventprogress[i] == 1:
+            if np[i] == barcolourlist[0]:
+                np[i] = color
+            else:
+                np[i] = eventcolourlist[0]
+    return True
 
 def remove_overlay(np):
     color = [barcolourlist[0], eventcolourlist[0]]                  # Example: [(0, 100, 0), (0, 0, 100)]
@@ -313,19 +307,91 @@ def remove_overlay(np):
     if flip == True:
         for i in range(n):
             if np[i] == color:
-                np[i] == barcolourlist[0]
+                np[i] = barcolourlist[0]
             else:
-                np[i] == (0, 0, 0)
-            time.sleep(0.005)
+                np[i] = (0, 0, 0)
+            np.write()
+            time.sleep(0.01)
     else:
         for i in reversed(range(n)):
             if np[i] == color:
-                np[i] == barcolourlist[0]
+                np[i] = barcolourlist[0]
             else:
-                np[i] == (0, 0, 0)
-            time.sleep(0.005)
-                
+                np[i] = (0, 0, 0)
+            np.write()
+            time.sleep(0.01)
     
+    
+def progress_bar(np):
+    print("Entering Progress Bar Display Mode")
+    # When you plug in, update rather than wait until the stroke of the next minute
+    print("Connected to WiFi")
+    # Set time and initialise variables
+    dow, offset = set_time(worldtimeurl)
+    clockin = 0
+    clockout = 0
+    eventbool = False
+    lastloopwork = False
+    lastevent = False
+    appointment_times = []
+    check = checkgoogle
+    while True:
+        try:
+            # wipe led clean before adding the pixels that represent the bar
+            for i in range(n):
+                np[i] = (0, 0, 0)
+            now = time.gmtime()
+            hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
+            dayname = whatday(int(now[6]))
+            if ignorehardcoded is False:
+                clockin = float(schedule[dayname][0]['clockin'])
+                clockout = float(schedule[dayname][0]['clockout'])
+            if googlecalbool:
+                try:
+                    if check >= checkgoogle:
+                        check = 0
+                        print('Updating from Google Calendar')
+                        appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
+                    eventbool = eventnow(hoursin, appointment_times)
+                    if ignorehardcoded is True:
+                        clockin = timetohour(appointment_times[0])
+                        clockout = timetohour(appointment_times[len(appointment_times)-1]) 
+                except:
+                    print('Scheduling issues when looking at Google Calendar')
+                check += 1
+            working = atwork(clockin, clockout, hoursin)
+            print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
+            if working is True: # These only need to be added to the bar if you're working
+                bar(np, hoursin, clockin, clockout, eventbool)
+                if googlecalbool:
+                    if twocolor:
+                        if eventbool == False:
+                            addevents(np, appointment_times, clockin, clockout)
+                            if lastevent:
+                                remove_overlay(np)
+                                lastevent = False
+                        else: lastevent = draw_overlay(np, hoursin, appointment_times)
+                    else: addevents(np, appointment_times, clockin, clockout)
+                if flip: np = flipit(np, n)
+            np.write()
+            gc.collect()  # clean up garbage in memory
+            if (lastloopwork is True) & (working is False):
+                # For event animations, use interrupts so that the time is exactly right
+                rainbow_cycle(np)
+                time.sleep(1)
+                off(np)
+                led.off()
+                machine_reset() # You were working last cycle, now you aren't - it's hometime        
+            lastloopwork = working
+            time.sleep(checkevery) 
+        except Exception as e:
+            print('Exception:',e)
+            off(np)
+            time.sleep(1)
+            machine.reset()
+        except KeyboardInterrupt:
+            off(np)
+
 def wifi_setup_mode():
     print("Entering setup mode...")
 
@@ -361,73 +427,6 @@ def wifi_setup_mode():
     dns.run_catchall(ip)
     server.run()
     
-    
-def progress_bar(np):
-    print("Entering Progress Bar Display Mode")
-    # When you plug in, update rather than wait until the stroke of the next minute
-    print("Connected to WiFi")
-    # Set time and initialise variables
-    dow, offset = set_time(worldtimeurl)
-    clockin = 0
-    clockout = 0
-    eventbool = False
-    lastloopwork = False
-    appointment_times = []
-    while True:
-        try:
-            # wipe led clean before adding the pixels that represent the bar
-            for i in range(n):
-                np[i] = (0, 0, 0)
-            now = time.gmtime()
-            hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
-            dayname = whatday(int(now[6]))
-            if ignorehardcoded is False:
-                clockin = float(schedule[dayname][0]['clockin'])
-                clockout = float(schedule[dayname][0]['clockout'])
-            if googlecalbool:
-                print('Updating from Google Calendar')
-                try:
-                    appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
-                    eventbool = eventnow(hoursin, appointment_times)
-                    if ignorehardcoded is True:
-                        clockin = timetohour(appointment_times[0])
-                        clockout = timetohour(appointment_times[len(appointment_times)-1]) 
-                except:
-                    print('Scheduling issues when looking at Google Calendar')
-            working = atwork(clockin, clockout, hoursin)
-            print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
-            if working is True: # These only need to be added to the bar if you're working
-                bar(np, hoursin, clockin, clockout, eventbool)
-                if googlecalbool:
-                    if twocolor:
-                        if eventbool == False:
-                            addevents(np, appointment_times, clockin, clockout)
-                            if lastevent:
-                                remove_overlay(np, appointment_times, clockin, clockout)
-                                lastevent = False
-                        else: lastevent = draw_overlay(np, eventbool, hoursin, appointment_times)
-                    else: addevents(np, appointment_times, clockin, clockout)
-                if flip: np = flipit(np, n)
-            np.write()
-            gc.collect()  # clean up garbage in memory
-            if (lastloopwork is True) & (working is False):
-                # For event animations, use interrupts so that the time is exactly right
-                rainbow_cycle(np)
-                time.sleep(1)
-                off(np)
-                led.off()
-                machine_reset() # You were working last cycle, now you aren't - it's hometime        
-            lastloopwork = working
-            time.sleep(checkevery) 
-        except Exception as e:
-            print('Exception:',e)
-            off(np)
-            time.sleep(1)
-            machine.reset()
-        except KeyboardInterrupt:
-            off(np)
-
-
 # Figure out which mode to start up in...
 def main():
     np = neopixel.NeoPixel(machine.Pin(p), n)
@@ -442,7 +441,7 @@ def main():
                 # into setup mode to get new credentials from the user.
                 print("Bad wifi connection!")
                 print(wifi_credentials)
-                os.remove(WIFI_FILE)
+                # os.remove(WIFI_FILE)
                 machine_reset()
             print(f"Connected to wifi, IP address {ip_address}")
             progress_bar(np)  # Contains all the progress bar code
