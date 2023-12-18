@@ -85,13 +85,23 @@ def get_today_appointment_times(calendar_id, api_key, tz):
     data = response.json()
     # Extract the appointment times
     appointment_times = []
+    cancelled_times = []
+    
     for item in data.get("items", []):
-         if item["status"] == "cancelled":
-             continue
-         start = item["start"].get("dateTime", item["start"].get("date"))
-         appointment_times.append(start)
-         start = item["end"].get("dateTime", item["end"].get("date"))
-         appointment_times.append(start)
+        if item["status"] == "cancelled":
+            start = item["originalStartTime"].get("dateTime", item["originalStartTime"].get("date"))
+            cancelled_times.append(start)
+         
+    for item in data.get("items", []):
+        if item["status"] == "cancelled":
+            continue
+        start = item["start"].get("dateTime", item["start"].get("date"))
+        if start in cancelled_times:
+            continue
+        appointment_times.append(start)
+        end = item["end"].get("dateTime", item["end"].get("date"))
+        appointment_times.append(end)
+        
     array = appointment_times
     for x in range(len(array)):
         array[x]=re.sub('.*T','',array[x])
