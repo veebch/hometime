@@ -59,7 +59,7 @@ AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
 WIFI_FILE = "wifi.json"
-twocolor = config.twocolor
+twocolor = config.TWOCOL
 
 if (ignorehardcoded is True) and (googlecalbool is False):
     print('incompatible options, setting ignorehardcoded to False')

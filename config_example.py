@@ -24,4 +24,4 @@ GPIOPIN = 13                                    # The pin that the signal wire o
 BARCOL = [(0, 100, 0),(0,0,100)]                            # Color in RGB from 0 to 255
 EVENTCOL = [(255, 255, 255), (255, 255, 0)]     # list of tuples used as meeting colors, if you only use one: [(255, 255, 255)]
 FLIP = True        
-twocolor = False
+TWOCOL = False
