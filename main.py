@@ -60,6 +60,8 @@ AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
 WIFI_FILE = "wifi.json"
 twocolor = config.TWOCOL
+overcol = tuple(map(lambda x: min(255, int(2*sum(x)/len(x))), zip(*[barcolourlist[0], eventcolourlist[0]])))
+
 
 if (ignorehardcoded is True) and (googlecalbool is False):
     print('incompatible options, setting ignorehardcoded to False')
@@ -285,41 +287,31 @@ def get_progress(hoursin, googletimes):
     eventpixel = [0] * n
     for i in range(barupto):
         eventpixel[i] = 1
+    if flip:
+        eventpixel = reversed(eventpixel)
     return eventpixel
         
 def draw_overlay(np, hoursin, googletimes):
-    color = [barcolourlist[0], eventcolourlist[0]]                  # Example: [(0, 100, 0), (0, 0, 100)]
-    color = tuple(map(lambda y: sum(y) / int(len(y)), zip(*color))) # Get average of tuples: (0, 50, 50)
-    color = tuple([int(2*x) for x in color])                        # Multiply tuples by two for same brightness: (0, 100, 100)
     eventprogress = get_progress(hoursin, googletimes)
     for i in range(n):
         if eventprogress[i] == 1:
             if np[i] == barcolourlist[0]:
-                np[i] = color
+                np[i] = overcol
             else:
                 np[i] = eventcolourlist[0]
     return True
 
 def remove_overlay(np):
-    color = [barcolourlist[0], eventcolourlist[0]]                  # Example: [(0, 100, 0), (0, 0, 100)]
-    color = tuple(map(lambda y: sum(y) / int(len(y)), zip(*color))) # Get average of tuples: (0, 50, 50)
-    color = tuple([int(2*x) for x in color])
-    if flip == True:
-        for i in range(n):
-            if np[i] == color:
-                np[i] = barcolourlist[0]
-            else:
-                np[i] = (0, 0, 0)
-            np.write()
-            time.sleep(0.01)
-    else:
-        for i in reversed(range(n)):
-            if np[i] == color:
-                np[i] = barcolourlist[0]
-            else:
-                np[i] = (0, 0, 0)
-            np.write()
-            time.sleep(0.01)
+    loop = range(n)
+    if flip == False:
+        loop = reversed(loop)
+    for i in loop:
+        if np[i] == overcol:
+            np[i] = barcolourlist[0]
+        else:
+            np[i] = (0, 0, 0)
+        np.write()
+        time.sleep(0.01)
     
     
 def progress_bar(np):
