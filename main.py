@@ -63,7 +63,7 @@ twocolor = config.TWOCOL
 overcol = tuple(map(lambda x: min(255, int(2*sum(x)/len(x))), zip(*[barcolourlist[0], eventcolourlist[0]])))
 
 
-if (ignorehardcoded is True) and (googlecalbool is False):
+if (ignorehardcoded) & (googlecalbool == False):
     print('incompatible options, setting ignorehardcoded to False')
     ignorehardcoded = False
 
@@ -120,15 +120,13 @@ def whatday(weekday):
 
 
 def set_time(worldtimeurl):
-    print('Grab time:',worldtimeurl)
+    print('Grab time: ', worldtimeurl)
     try:
         response = urequests.get(worldtimeurl)
     except:
-        print('Problem with',worldtimeurl)
+        print('Problem with ', worldtimeurl)
     # parse JSON
-    print('got response')
     parsed = response.json()
-    print('parsed')
     datetime_str = str(parsed["currentLocalTime"])
     year = int(datetime_str[0:4])
     month = int(datetime_str[5:7])
@@ -176,7 +174,7 @@ def eventnow(hoursin, googletimes):
     return event
    
 
-def flipit(np,n):
+def flipit(np, n):
     temp=[0]*n
     for i in range(n):
         temp[i]=np[i]
@@ -274,9 +272,21 @@ def rainbow_cycle(np):
 
 def atwork(clockin, clockout, time):
     work = False
-    if (time >= clockin) & (time <clockout):
+    if (time >= clockin) & (time < clockout):
         work = True
     return work
+
+def anim_restore(np, hoursin, clockin, clockout):
+    ledindex = hourtoindex(hoursin, clockin, clockout)
+    for i in range(n):
+        np[i] = (0, 0, 0)
+    for i in range(ledindex):
+        np[i] = barcolourlist[0]
+        if flip: flipit(np, n)
+        np.write()
+        if flip: flipit(np, n)
+        time.sleep(0.01)
+    if flip: flipit(np, n)
 
 def get_progress(hoursin, googletimes):        
     for i in range(0, len(googletimes)-1, 2):
@@ -284,7 +294,7 @@ def get_progress(hoursin, googletimes):
         hourend = timetohour(googletimes[i+1])
         if hourstart < hoursin < hourend:
             barupto = hourtoindex(hoursin, hourstart, hourend)
-    eventpixel = [0] * n
+    eventpixel = [0]*n
     for i in range(barupto):
         eventpixel[i] = 1
     if flip:
@@ -335,7 +345,7 @@ def progress_bar(np):
             now = time.gmtime()
             hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
             dayname = whatday(int(now[6]))
-            if ignorehardcoded is False:
+            if ignorehardcoded == False:
                 clockin = float(schedule[dayname][0]['clockin'])
                 clockout = float(schedule[dayname][0]['clockout'])
             if googlecalbool:
@@ -345,15 +355,15 @@ def progress_bar(np):
                         print('Updating from Google Calendar')
                         appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
                     eventbool = eventnow(hoursin, appointment_times)
-                    if ignorehardcoded is True:
+                    if ignorehardcoded == True:
                         clockin = timetohour(appointment_times[0])
                         clockout = timetohour(appointment_times[len(appointment_times)-1]) 
                 except:
-                    print('Scheduling issues when looking at Google Calendar')
+                    print('Scheduling issues / No calendar entries')
                 check += 1
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
-            if working is True: # These only need to be added to the bar if you're working
+            if working: # These only need to be added to the bar if you're working
                 bar(np, hoursin, clockin, clockout, eventbool)
                 if googlecalbool:
                     if twocolor:
@@ -364,10 +374,11 @@ def progress_bar(np):
                                 lastevent = False
                         else: lastevent = draw_overlay(np, hoursin, appointment_times)
                     else: addevents(np, appointment_times, clockin, clockout)
+                if lastloopwork == False: anim_restore(np, hoursin, clockin, clockout)
                 if flip: np = flipit(np, n)
             np.write()
             gc.collect()  # clean up garbage in memory
-            if (lastloopwork is True) & (working is False):
+            if (lastloopwork) & (working == False):
                 # For event animations, use interrupts so that the time is exactly right
                 rainbow_cycle(np)
                 time.sleep(1)
@@ -377,7 +388,7 @@ def progress_bar(np):
             lastloopwork = working
             time.sleep(checkevery) 
         except Exception as e:
-            print('Exception:',e)
+            print('Exception: ', e)
             off(np)
             time.sleep(1)
             machine.reset()
