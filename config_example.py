@@ -21,7 +21,12 @@ SCHEDULE = {                                    # This doesn't get used if IGNOR
 
 PIXELS = 144                                    # The number of pixels on the neopixel strip
 GPIOPIN = 13                                    # The pin that the signal wire of the LED strip is connected to
-BARCOL = [(0, 100, 0),(0,0,100)]                            # Color in RGB from 0 to 255
+BARCOL = [(0, 100, 0), (0, 0, 100)]             # Color in RGB from 0 to 255
 EVENTCOL = [(255, 255, 255), (255, 255, 0)]     # list of tuples used as meeting colors, if you only use one: [(255, 255, 255)]
-FLIP = True        
-TWOCOL = False
+DISPLAY_EVENTS = True                           # Shows events
+FLIP = False                                    # Set to True if you want to flip the bar
+
+# Other
+
+TWOCOL = False                                  # Displays a second bar that shows the progress of an event. While event is active, other events are not displayed anymore.
+DELWIFI = True                                  # Deletes wifi credentials if the connection fails

@@ -61,8 +61,8 @@ AP_TEMPLATE_PATH = "ap_templates"
 WIFI_FILE = "wifi.json"
 twocolor = config.TWOCOL
 overcol = tuple(map(lambda x: min(255, int(2*sum(x)/len(x))), zip(*[barcolourlist[0], eventcolourlist[0]])))
-
-
+delwifi = config.DELWIFI
+displayevents = config.DISPLAY_EVENTS
 if (ignorehardcoded) & (googlecalbool == False):
     print('incompatible options, setting ignorehardcoded to False')
     ignorehardcoded = False
@@ -288,7 +288,8 @@ def anim_restore(np, hoursin, clockin, clockout):
         time.sleep(0.01)
     if flip: flipit(np, n)
 
-def get_progress(hoursin, googletimes):        
+def get_progress(hoursin, times):
+    googletimes = times        
     for i in range(0, len(googletimes)-1, 2):
         hourstart = timetohour(googletimes[i])
         hourend = timetohour(googletimes[i+1])
@@ -311,12 +312,20 @@ def draw_overlay(np, hoursin, googletimes):
                 np[i] = eventcolourlist[0]
     return True
 
-def remove_overlay(np):
+def remove_overlay(np, upto, clockin, clockout):
     loop = range(n)
-    if flip == False:
+    barupto = hourtoindex(upto, clockin, clockout)
+    if flip:
+        rbarupto = n - barupto
+        rev = True
+    else:
         loop = reversed(loop)
+        rev = False
+    
     for i in loop:
-        if np[i] == overcol:
+        if i <= barupto and rev == False:
+            np[i] = barcolourlist[0]
+        elif i >= rbarupto and rev == True:
             np[i] = barcolourlist[0]
         else:
             np[i] = (0, 0, 0)
@@ -368,12 +377,12 @@ def progress_bar(np):
                 if googlecalbool:
                     if twocolor:
                         if eventbool == False:
-                            addevents(np, appointment_times, clockin, clockout)
                             if lastevent:
-                                remove_overlay(np)
+                                remove_overlay(np, hoursin, clockin, clockout)
                                 lastevent = False
+                            if displayevents: addevents(np, appointment_times, clockin, clockout)
                         else: lastevent = draw_overlay(np, hoursin, appointment_times)
-                    else: addevents(np, appointment_times, clockin, clockout)
+                    elif displayevents: addevents(np, appointment_times, clockin, clockout)
                 if lastloopwork == False: anim_restore(np, hoursin, clockin, clockout)
                 if flip: np = flipit(np, n)
             np.write()
@@ -444,7 +453,7 @@ def main():
                 # into setup mode to get new credentials from the user.
                 print("Bad wifi connection!")
                 print(wifi_credentials)
-                os.remove(WIFI_FILE)
+                if delwifi: os.remove(WIFI_FILE)
                 machine_reset()
             print(f"Connected to wifi, IP address {ip_address}")
             progress_bar(np)  # Contains all the progress bar code
