@@ -1,4 +1,4 @@
-"""
+:"""
     Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
     Proof of Concept. Fork the repository and make it better
     
@@ -389,6 +389,7 @@ def progress_bar(np):
             working = atwork(clockin, clockout, hoursin)
             print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
             if working: # These only need to be added to the bar if you're working
+                if lastloopwork == False: anim_restore(np, hoursin, clockin, clockout)
                 bar(np, hoursin, clockin, clockout, eventbool)
                 if googlecalbool:
                     if twocolor:
@@ -399,7 +400,7 @@ def progress_bar(np):
                             if displayevents: addevents(np, appointment_times, clockin, clockout)
                         else: lastevent = draw_overlay(np, hoursin, appointment_times)
                     elif displayevents: addevents(np, appointment_times, clockin, clockout)
-                if lastloopwork == False: anim_restore(np, hoursin, clockin, clockout)
+                
                 if flip: np = flipit(np, n)
             np.write()
             gc.collect()  # clean up garbage in memory
