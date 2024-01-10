@@ -89,13 +89,23 @@ def get_today_appointment_times(calendar_id, api_key, tz):
     data = response.json()
     # Extract the appointment times
     appointment_times = []
+    cancelled_times = []
+    
     for item in data.get("items", []):
-         if item["status"] == "cancelled":
-             continue
-         start = item["start"].get("dateTime", item["start"].get("date"))
-         appointment_times.append(start)
-         start = item["end"].get("dateTime", item["end"].get("date"))
-         appointment_times.append(start)
+        if item["status"] == "cancelled":
+            start = item["originalStartTime"].get("dateTime", item["originalStartTime"].get("date"))
+            cancelled_times.append(start)
+        
+    for item in data.get("items", []):
+        if item["status"] == "cancelled":
+            continue
+        start = item["start"].get("dateTime", item["start"].get("date"))
+        if start in cancelled_times:
+            continue
+        appointment_times.append(start)
+        end = item["end"].get("dateTime", item["end"].get("date"))
+        appointment_times.append(end)
+        
     array = appointment_times
     for x in range(len(array)):
         array[x]=re.sub('.*T','',array[x])
@@ -170,7 +180,6 @@ def eventnow(hoursin, googletimes):
                 print('EventNow')
     except:
         pass
-    
     return event
    
 
@@ -293,7 +302,7 @@ def get_progress(hoursin, times):
     for i in range(0, len(googletimes)-1, 2):
         hourstart = timetohour(googletimes[i])
         hourend = timetohour(googletimes[i+1])
-        if hourstart < hoursin < hourend:
+        if hourstart <= hoursin <= hourend:
             barupto = hourtoindex(hoursin, hourstart, hourend)
     eventpixel = [0]*n
     for i in range(barupto):
@@ -315,13 +324,16 @@ def draw_overlay(np, hoursin, googletimes):
 def remove_overlay(np, upto, clockin, clockout):
     loop = range(n)
     barupto = hourtoindex(upto, clockin, clockout)
+    rbarupto = n - barupto
+    for i in range(n):
+        np[i] = eventcolourlist[0]
     if flip:
-        rbarupto = n - barupto
         rev = True
+        for i in range(rbarupto+1, n): np[i] = overcol
     else:
         loop = reversed(loop)
         rev = False
-    
+        for i in range(barupto-1): np[i] = overcol
     for i in loop:
         if i <= barupto and rev == False:
             np[i] = barcolourlist[0]
@@ -337,8 +349,12 @@ def progress_bar(np):
     print("Entering Progress Bar Display Mode")
     # When you plug in, update rather than wait until the stroke of the next minute
     print("Connected to WiFi")
+    np[0] = (0, 10, 10)
+    np.write()
     # Set time and initialise variables
     dow, offset = set_time(worldtimeurl)
+    np[0] = (0, 10, 0)
+    np.write()
     clockin = 0
     clockout = 0
     eventbool = False
@@ -442,6 +458,8 @@ def wifi_setup_mode():
 # Figure out which mode to start up in...
 def main():
     np = neopixel.NeoPixel(machine.Pin(p), n)
+    np[0] = (0, 0, 10)
+    np.write()
     try:
         os.stat(WIFI_FILE)
         # File was found, attempt to connect to wifi...
@@ -454,16 +472,19 @@ def main():
                 print("Bad wifi connection!")
                 print(wifi_credentials)
                 if delwifi: os.remove(WIFI_FILE)
+                np[0] = (10, 0, 0)
+                np.write()
                 machine_reset()
             print(f"Connected to wifi, IP address {ip_address}")
             progress_bar(np)  # Contains all the progress bar code
+            
     except Exception:
         # Either no wifi configuration file found, or something went wrong,
         # so go into setup mode
-        for i in range(0, n):
-            np[i] = (choice((0,255)), 0, 0)
+        np[0] = (10, 10, 0)
         np.write()    
         wifi_setup_mode()
-    
+        
 if __name__ == "__main__":
     main()
+
