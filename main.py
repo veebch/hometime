@@ -53,13 +53,17 @@ led = machine.Pin("LED", machine.Pin.OUT)
 led.off()
 led.on()
 time.sleep(1)
-eventbool = False # Initialising, no need to edit
-checkevery = config.REFRESH   # Number of seconds for interval refreshing neopixel
+checkevery = config.REFRESH   # Number of seconds for interval refreshinag neopixel
+checkgoogle = config.GOOGLE_REFRESH
 AP_NAME = "veebprojects"
 AP_DOMAIN = "pipico.net"
 AP_TEMPLATE_PATH = "ap_templates"
 WIFI_FILE = "wifi.json"
-if (ignorehardcoded is True) and (googlecalbool is False):
+twocolor = config.TWOCOL
+overcol = tuple(map(lambda x: min(255, int(2*sum(x)/len(x))), zip(*[barcolourlist[0], eventcolourlist[0]])))
+delwifi = config.DELWIFI
+displayevents = config.DISPLAY_EVENTS
+if (ignorehardcoded) & (googlecalbool == False):
     print('incompatible options, setting ignorehardcoded to False')
     ignorehardcoded = False
 
@@ -85,13 +89,23 @@ def get_today_appointment_times(calendar_id, api_key, tz):
     data = response.json()
     # Extract the appointment times
     appointment_times = []
+    cancelled_times = []
+    
     for item in data.get("items", []):
-         if item["status"] == "cancelled":
-             continue
-         start = item["start"].get("dateTime", item["start"].get("date"))
-         appointment_times.append(start)
-         start = item["end"].get("dateTime", item["end"].get("date"))
-         appointment_times.append(start)
+        if item["status"] == "cancelled":
+            start = item["originalStartTime"].get("dateTime", item["originalStartTime"].get("date"))
+            cancelled_times.append(start)
+        
+    for item in data.get("items", []):
+        if item["status"] == "cancelled":
+            continue
+        start = item["start"].get("dateTime", item["start"].get("date"))
+        if start in cancelled_times:
+            continue
+        appointment_times.append(start)
+        end = item["end"].get("dateTime", item["end"].get("date"))
+        appointment_times.append(end)
+        
     array = appointment_times
     for x in range(len(array)):
         array[x]=re.sub('.*T','',array[x])
@@ -116,15 +130,13 @@ def whatday(weekday):
 
 
 def set_time(worldtimeurl):
-    print('Grab time:',worldtimeurl)
+    print('Grab time: ', worldtimeurl)
     try:
         response = urequests.get(worldtimeurl)
     except:
-        print('Problem with',worldtimeurl)
+        print('Problem with ', worldtimeurl)
     # parse JSON
-    print('got response')
     parsed = response.json()
-    print('parsed')
     datetime_str = str(parsed["currentLocalTime"])
     year = int(datetime_str[0:4])
     month = int(datetime_str[5:7])
@@ -148,10 +160,10 @@ def set_time(worldtimeurl):
 
 def bar(np, upto, clockin, clockout, event):
     barupto = hourtoindex(upto, clockin, clockout)
-    if event is False:
-        colourbar = barcolourlist[0]
-    else:
+    if event and twocolor is False:
         colourbar = barcolourlist[1]
+    else:
+        colourbar = barcolourlist[0]
     for i in range(barupto):
         np[i] = colourbar
         
@@ -159,20 +171,19 @@ def bar(np, upto, clockin, clockout, event):
 def eventnow(hoursin, googletimes):
     # This returns whether you're currently in a meeting and will be used to change the colour of the bar
     event = False
-    print('EventNow')
     try:
         for i in range(0,len(googletimes)-1,2):
             hourstart = timetohour(googletimes[i])
             hourend = timetohour(googletimes[i+1])
             if ((hourstart <= hoursin) & (hourend >= hoursin)):
                 event = True
-                print('In an event, bar will change colour')
+                print('EventNow')
     except:
         pass
     return event
    
 
-def flipit(np,n):
+def flipit(np, n):
     temp=[0]*n
     for i in range(n):
         temp[i]=np[i]
@@ -229,6 +240,7 @@ def off(np):
         np[i] = (0, 0, 0)
         np.write()
 
+
 def hourtoindex(hoursin, clockin, clockout):
     index = int(math.floor(n*(hoursin - clockin)/(clockout-clockin)))
     if index < 0 or index > n:
@@ -269,10 +281,144 @@ def rainbow_cycle(np):
 
 def atwork(clockin, clockout, time):
     work = False
-    if (time >= clockin) & (time <clockout):
+    if (time >= clockin) & (time < clockout):
         work = True
     return work
 
+def anim_restore(np, hoursin, clockin, clockout):
+    ledindex = hourtoindex(hoursin, clockin, clockout)
+    for i in range(n):
+        np[i] = (0, 0, 0)
+    for i in range(ledindex):
+        np[i] = barcolourlist[0]
+        if flip: flipit(np, n)
+        np.write()
+        if flip: flipit(np, n)
+        time.sleep(0.01)
+    if flip: flipit(np, n)
+
+def get_progress(hoursin, times):
+    googletimes = times        
+    for i in range(0, len(googletimes)-1, 2):
+        hourstart = timetohour(googletimes[i])
+        hourend = timetohour(googletimes[i+1])
+        if hourstart <= hoursin <= hourend:
+            barupto = hourtoindex(hoursin, hourstart, hourend)
+    eventpixel = [0]*n
+    for i in range(barupto):
+        eventpixel[i] = 1
+    if flip:
+        eventpixel = reversed(eventpixel)
+    return eventpixel
+        
+def draw_overlay(np, hoursin, googletimes):
+    eventprogress = get_progress(hoursin, googletimes)
+    for i in range(n):
+        if eventprogress[i] == 1:
+            if np[i] == barcolourlist[0]:
+                np[i] = overcol
+            else:
+                np[i] = eventcolourlist[0]
+    return True
+
+def remove_overlay(np, upto, clockin, clockout):
+    loop = range(n)
+    barupto = hourtoindex(upto, clockin, clockout)
+    rbarupto = n - barupto
+    for i in range(n):
+        np[i] = eventcolourlist[0]
+    if flip:
+        rev = True
+        for i in range(rbarupto+1, n): np[i] = overcol
+    else:
+        loop = reversed(loop)
+        rev = False
+        for i in range(barupto-1): np[i] = overcol
+    for i in loop:
+        if i <= barupto and rev == False:
+            np[i] = barcolourlist[0]
+        elif i >= rbarupto and rev == True:
+            np[i] = barcolourlist[0]
+        else:
+            np[i] = (0, 0, 0)
+        np.write()
+        time.sleep(0.01)
+    
+    
+def progress_bar(np):
+    print("Entering Progress Bar Display Mode")
+    # When you plug in, update rather than wait until the stroke of the next minute
+    print("Connected to WiFi")
+    np[0] = (0, 10, 10)
+    np.write()
+    # Set time and initialise variables
+    dow, offset = set_time(worldtimeurl)
+    np[0] = (0, 10, 0)
+    np.write()
+    clockin = 0
+    clockout = 0
+    eventbool = False
+    lastloopwork = False
+    lastevent = False
+    appointment_times = []
+    check = checkgoogle
+    while True:
+        try:
+            # wipe led clean before adding the pixels that represent the bar
+            for i in range(n):
+                np[i] = (0, 0, 0)
+            now = time.gmtime()
+            hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
+            dayname = whatday(int(now[6]))
+            if ignorehardcoded == False:
+                clockin = float(schedule[dayname][0]['clockin'])
+                clockout = float(schedule[dayname][0]['clockout'])
+            if googlecalbool:
+                try:
+                    if check >= checkgoogle:
+                        check = 0
+                        print('Updating from Google Calendar')
+                        appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
+                    eventbool = eventnow(hoursin, appointment_times)
+                    if ignorehardcoded == True:
+                        clockin = timetohour(appointment_times[0])
+                        clockout = timetohour(appointment_times[len(appointment_times)-1]) 
+                except:
+                    print('Scheduling issues / No calendar entries')
+                check += 1
+            working = atwork(clockin, clockout, hoursin)
+            print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
+            if working: # These only need to be added to the bar if you're working
+                bar(np, hoursin, clockin, clockout, eventbool)
+                if googlecalbool:
+                    if twocolor:
+                        if eventbool == False:
+                            if lastevent:
+                                remove_overlay(np, hoursin, clockin, clockout)
+                                lastevent = False
+                            if displayevents: addevents(np, appointment_times, clockin, clockout)
+                        else: lastevent = draw_overlay(np, hoursin, appointment_times)
+                    elif displayevents: addevents(np, appointment_times, clockin, clockout)
+                if lastloopwork == False: anim_restore(np, hoursin, clockin, clockout)
+                if flip: np = flipit(np, n)
+            np.write()
+            gc.collect()  # clean up garbage in memory
+            if (lastloopwork) & (working == False):
+                # For event animations, use interrupts so that the time is exactly right
+                rainbow_cycle(np)
+                time.sleep(1)
+                off(np)
+                led.off()
+                machine_reset() # You were working last cycle, now you aren't - it's hometime        
+            lastloopwork = working
+            time.sleep(checkevery) 
+        except Exception as e:
+            print('Exception: ', e)
+            off(np)
+            time.sleep(1)
+            machine.reset()
+        except KeyboardInterrupt:
+            off(np)
 
 def wifi_setup_mode():
     print("Entering setup mode...")
@@ -309,69 +455,11 @@ def wifi_setup_mode():
     dns.run_catchall(ip)
     server.run()
     
-    
-def progress_bar(np):
-    print("Entering Progress Bar Display Mode")
-    # When you plug in, update rather than wait until the stroke of the next minute
-    print("Connected to WiFi")
-    # Set time and initialise variables
-    dow, offset = set_time(worldtimeurl)
-    clockin = 0
-    clockout = 0
-    eventbool = False
-    lastloopwork = False
-    appointment_times = []
-    while True:
-        try:
-            # wipe led clean before adding the pixels that represent the bar
-            for i in range(n):
-                np[i] = (0, 0, 0)
-            now = time.gmtime()
-            hoursin = float(now[3])+float(now[4])/60 + float(now[5])/3600  # hours into the day
-            dayname = whatday(int(now[6]))
-            if ignorehardcoded is False:
-                clockin = float(schedule[dayname][0]['clockin'])
-                clockout = float(schedule[dayname][0]['clockout'])
-            if googlecalbool:
-                print('Updating from Google Calendar')
-                try:
-                    appointment_times = get_today_appointment_times(calendar, api_key, config.TIMEZONE)
-                    eventbool = eventnow(hoursin, appointment_times)
-                    if ignorehardcoded is True:
-                        clockin = timetohour(appointment_times[0])
-                        clockout = timetohour(appointment_times[len(appointment_times)-1]) 
-                except:
-                    print('Scheduling issues when looking at Google Calendar')
-            working = atwork(clockin, clockout, hoursin)
-            print(f"Working={working}, clock-in={clockin}, clock-out={clockout}, hours in={hoursin}")
-            if working is True: # These only need to be added to the bar if you're working
-                # Add the events and bar to np and flip if needed
-                if googlecalbool: addevents(np, appointment_times, clockin, clockout)
-                bar(np, hoursin, clockin, clockout,eventbool)
-                if flip: np = flipit(np,n)
-            np.write()
-            gc.collect()  # clean up garbage in memory
-            if (lastloopwork is True) & (working is False):
-                # For event animations, use interrupts so that the time is exactly right
-                rainbow_cycle(np)
-                time.sleep(1)
-                off(np)
-                led.off()
-                machine_reset() # You were working last cycle, now you aren't - it's hometime        
-            lastloopwork = working
-            time.sleep(checkevery) 
-        except Exception as e:
-            print('Exception:',e)
-            off(np)
-            time.sleep(1)
-            machine.reset()
-        except KeyboardInterrupt:
-            off(np)
-
-
 # Figure out which mode to start up in...
 def main():
     np = neopixel.NeoPixel(machine.Pin(p), n)
+    np[0] = (0, 0, 10)
+    np.write()
     try:
         os.stat(WIFI_FILE)
         # File was found, attempt to connect to wifi...
@@ -383,17 +471,20 @@ def main():
                 # into setup mode to get new credentials from the user.
                 print("Bad wifi connection!")
                 print(wifi_credentials)
-                os.remove(WIFI_FILE)
+                if delwifi: os.remove(WIFI_FILE)
+                np[0] = (10, 0, 0)
+                np.write()
                 machine_reset()
             print(f"Connected to wifi, IP address {ip_address}")
             progress_bar(np)  # Contains all the progress bar code
+            
     except Exception:
         # Either no wifi configuration file found, or something went wrong,
         # so go into setup mode
-        for i in range(0, n):
-            np[i] = (choice((0,255)), 0, 0)
+        np[0] = (10, 10, 0)
         np.write()    
         wifi_setup_mode()
-    
+        
 if __name__ == "__main__":
     main()
+
