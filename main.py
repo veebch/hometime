@@ -1,4 +1,4 @@
-:"""
+"""
     Progress Bar. Takes a pico W and a light strip to make a physical progress bar.
     Proof of Concept. Fork the repository and make it better
     
