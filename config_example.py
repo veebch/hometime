@@ -20,7 +20,7 @@ SCHEDULE = {                                    # This doesn't get used if IGNOR
 # Neopixel
 
 PIXELS = 144                                    # The number of pixels on the neopixel strip
-GPIOPIN = 13                                    # The pin that the signal wire of the LED strip is connected to
+GPIOPIN = 15                                    # The pin that the signal wire of the LED strip is connected to
 BARCOL = [(0, 100, 0), (0, 0, 100)]             # Color in RGB from 0 to 255
 EVENTCOL = [(255, 255, 255), (255, 255, 0)]     # list of tuples used as meeting colors, if you only use one: [(255, 255, 255)]
 DISPLAY_EVENTS = True                           # Shows events
